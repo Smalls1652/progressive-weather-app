@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta charset="utf-8">
+    <link rel="icon" href="/images/icons/icon-256x256.png" sizes="256x256">
+
+    <title>Progressive Weather App</title>
+
+    <!-- Safari WebApp -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="pWeather">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="images/icons/icon-512x512.png">
+
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+
+    <!-- Files needed for Bootstrap -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous">
+
+    <!-- Weather Icons -->
+    <link rel="stylesheet" href="./style/weather-icons.css">
+
+    <!-- Progressive Weather App -->
+    <link rel="stylesheet" href="./style/main.css">
+
+</head>
+
+<body>
+    <nav class="navbar fixed-top navbar-dark bg-dark devicespecific">
+        <a class="navbar-brand" href="#">
+            <img src="/images/icons/icon.svg" width="40" height="40" class="d-inline-block align-middle">
+            <span id="WhereAmI"></span>
+        </a>
+        <form class="form-inline">
+            <a class="btn btn-info" href="#" role="button" onclick="runFreshUpdate();">
+                <i class="refreshIcon wi wi-refresh"></i>
+            </a>
+        </form>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h3>Current Conditions</h3>
+
+                <div class="d-flex flex-row">
+                    <div class="p-1 text-left">
+                        <span id="weatherIcon"></span>
+                    </div>
+                    <div class="p-2 text-left condFont">
+                        <p class="currentCondition"></p>
+                        <p class="currentTemp"> &#8457;</p>
+                        <p class="footerText lastUpdated"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <h3>12-Hour Forecast</h3>
+                <div id="hourlyTbl" class="hourlyRow text-center table-responsive">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 pb-3">
+                <h3>
+                    <a role="button" href="#afdCard" data-toggle="collapse" data-target="#afdCard" aria-expanded="false" aria-controls="#afdCard">Area Forecast Discussion</a>
+                    </h5>
+                    <div id="afdCard" class="card collapse show">
+                        <div id="afdCardBody" class="card-body text-left afdFont">
+                            <span id="afdText"></span>
+                        </div>
+                    </div>
+            </div>
+            <div class="col">
+                <h3>Week at a Glance</h3>
+                <div class="week-at-a-glance forecastList d-flex flex-row align-items-start flex-wrap">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <p class="footerText">Weather data provided by
+                <a href="https://openweathermap.org">OpenWeatherMap</a> and the
+                <a href="https://weather.gov">NWS</a> API.</p>
+
+        </div>
+    </div>
+    <!-- Nodejs stuff -->
+    <script type="text/javascript" src="/scripts/localforage.js"></script>
+
+    <!-- Progressive Weather App -->
+    <script type="text/javascript" src="/scripts/main.js"></script>
+    <script type="text/javascript" src="scripts/app.js"></script>
+
+    <script>
+        $(document).ready(async function () {
+            await checkLocalWeatherData(async function (o) {
+                if (o.old == true) {
+                    console.log("Data is either old or doesn't exist. Loading new data...");
+                    await locationSuccess(async function (awd) {
+                        console.log("Checking the DB for new data...");
+                        await getLastSavedWeatherData(async function (data) {
+                            console.log("Placing data...");
+                            await placeData(data);
+                            $(".lastUpdated").text("(Last updated: Just Now)");
+                        });
+                        console.log("Done.")
+                    });
+                }
+                else {
+                    await getLastSavedWeatherData(async function (initdata) {
+                        console.log("Placing inital load data...");
+                        await placeData(initdata);
+                        if (o.timeSince < 1) {
+                            $(".lastUpdated").text("(Last updated: A few moments ago)");
+                        }
+                        else {
+                            $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                        }
+                        console.log("Done.")
+                        console.log("Checking the DB for last good data...");
+                        await getLastSavedWeatherData(async function (data) {
+                            console.log("Placing data...");
+                            await placeData(data);
+                            if (o.timeSince < 1) {
+                                $(".lastUpdated").text("(Last updated: A few moments ago)");
+                            }
+                            else {
+                                $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                            }
+                            console.log("Done.")
+                        });
+                    });
+                }
+            });
+        });
+
+        if ($(window).width() < 992) {
+            $("#afdCard").removeClass("show");
+        }
+
+        $(window).resize(function () {
+            if ($(window).width() < 992) {
+                $("#afdCard").removeClass("show");
+            }
+            else {
+                if (!($("#afdCard").hasClass("show"))) {
+                    $("#afdCard").addClass("show");
+                }
+            }
+        });
+
+
+        $("#refreshButton").click(async function () {
+            await runFreshUpdate();
+        }, false);
+    </script>
+</body>
+
+</html>

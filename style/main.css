@@ -1,0 +1,154 @@
+body {
+    padding-top: 75px;
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* iPhone X */
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
+    body {
+        padding-top: 110px;
+    }
+    .devicespecific {
+        padding-top: calc(env(safe-area-inset-top) + 5px);
+    }
+}
+
+/* iPhone 6,7,8 */
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-device-pixel-ratio: 2) {
+    body {
+        padding-top: 85px;
+    }
+    .devicespecific {
+        padding-top: 20px;
+    }
+}
+
+/* iPhone 6+,7+,8+ */
+
+@media only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) {
+    body {
+        padding-top: 85px;
+    }
+    .devicespecific {
+        padding-top: 20px;
+    }
+}
+
+/* iPad Pro 10.5" */
+
+@media only screen and (min-device-width: 834px) and (max-device-width: 1112px) and (-webkit-min-device-pixel-ratio: 2) {
+    body {
+        padding-top: 85px;
+    }
+    .devicespecific {
+        padding-top: 20px;
+    }
+}
+
+/* iPad Pro 12.9" */
+
+@media only screen and (min-device-width: 1024px) and (max-device-width: 1366px) and (-webkit-min-device-pixel-ratio: 2) {
+    body {
+        padding-top: 85px;
+    }
+    .devicespecific {
+        padding-top: 20px;
+    }
+}
+
+.current-cond-icon {
+    font-size: 6rem;
+}
+
+.forecasticon {
+    font-size: 3rem;
+}
+
+.refreshIcon {
+    font-size: 1.5rem;
+}
+
+.nowRefresh {
+    animation-name: spin;
+    animation-duration: 4000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.condFont {
+    font-size: 2rem;
+}
+
+.shortForecastFont {
+    font-size: 0.5rem;
+}
+
+.forecastTempFont {
+    font-size: 2rem;
+}
+
+.forecastFont {
+    font-size: 1rem;
+}
+
+.flex-fill {
+    flex: 1 1 auto;
+}
+
+#afdCardBody {
+    height: 400px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.afdFont {
+    font-size: 1rem;
+    white-space: pre;
+}
+
+.hourlyList {
+    overflow-x: scroll;
+    width: 100%;
+}
+
+.hourlyIcon {
+    font-size: 2.5rem;
+}
+
+.hourlyTemp {
+    font-size: 1rem;
+}
+
+.highTemp {
+    color: #ffb84d;
+}
+
+.lowTemp {
+    color: #809fff;
+}
+
+.footerText {
+    font-size: 0.8rem;
+}
+
+.table-fit {
+    width: 1px;
+}
+
+table {
+    width: auto !important;
+    table-layout: auto;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "name": "progressive-weather-app",
+    "version": "0.1",
+    "main": "index.html",
+    "author": "Smalls",
+    "dependencies": {
+        "bootstrap":"^4.1.1",
+        "jquery":"^3.3.1",
+        "weather-icons": "^2.0.10",
+        "popper.js":"^1.14.3",
+        "localforage":"^1.7.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Smalls1652/progressive-weather-app.git"
+      },
+      "homepage": "https://github.com/Smalls1652/progressive-weather-app",
+      "description": ""
+}
