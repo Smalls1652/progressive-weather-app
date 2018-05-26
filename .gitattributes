@@ -1,1 +1,4 @@
 *.html linguist-language=HTML
+style/* linguist-vendored
+icons/* linguist-vendored
+font/* linguist-vendored
