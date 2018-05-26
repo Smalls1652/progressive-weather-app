@@ -1,5 +1,3 @@
-var omwAPI = "";
-
 var geoLoc = {};
 
 var apiCalls = [];
