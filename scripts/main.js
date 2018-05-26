@@ -2,8 +2,17 @@ var geoLoc = {};
 
 var apiCalls = [];
 
-function shortForecastIcon(condition) {
+function shortForecastIcon(condition, daynight) {
     //console.log(condition);
+
+    var t;
+    if (daynight) {
+        t = "day";
+    }
+    else
+    {
+        t = "night";
+    }
 
     if (/(tsra)/i.test(condition)) {
         //console.log("Thunderstorms");
@@ -11,19 +20,43 @@ function shortForecastIcon(condition) {
     }
     else if (/(few)/i.test(condition)) {
         //console.log("Partly Cloudy");
-        return "wi-day-sunny-overcast";
+        if (daynight) {
+            return "wi-day-sunny-overcast";
+        }
+        else
+        {
+            return "wi-night-alt-partly-cloudy";
+        }
     }
     else if (/(bkn)/i.test(condition)) {
         //console.log("Mostly Cloudy");
-        return "wi-day-sunny-overcast";
+        if (daynight) {
+            return "wi-day-sunny-overcast";
+        }
+        else
+        {
+            return "wi-night-alt-partly-cloudy";
+        }
     }
     else if (/(sct)/i.test(condition)) {
         //console.log("Partly Cloudy");
-        return "wi-day-sunny-overcast";
+        if (daynight) {
+            return "wi-day-sunny-overcast";
+        }
+        else
+        {
+            return "wi-night-alt-partly-cloudy";
+        }
     }
     else if (/(skc)/i.test(condition)) {
         //console.log("Sunny");
-        return "wi-day-sunny";
+        if (daynight) {
+            return "wi-day-sunny";
+        }
+        else
+        {
+            return "wi-night-clear";
+        }
     }
     else if (/(ovc)/i.test(condition)) {
         //console.log("Overcast");
@@ -31,7 +64,13 @@ function shortForecastIcon(condition) {
     }
     else if (/(fg)/i.test(condition)) {
         //console.log("Fog");
-        return "wi-day-fog";
+        if (daynight) {
+            return "wi-day-fog";
+        }
+        else
+        {
+            return "wi-fog";
+        }
     }
     else if (/(shra)/i.test(condition)) {
         //console.log("Rain");
@@ -111,7 +150,8 @@ async function locationSuccess(callback) {
                                         "hour": val.startTime,
                                         "temp": val.temperature,
                                         "icon": val.icon,
-                                        "condition": val.shortForecast
+                                        "condition": val.shortForecast,
+                                        "isDayTime": val.isDaytime
                                     });
                                 });
 
@@ -234,8 +274,6 @@ async function getHourlyForecast(apiCall, callback) {
 
 async function getNextFiveDays(apiCall, callback) {
 
-    $(".forecastList").html(null);
-
     $.getJSON(apiCall.forecast, await function (data) {
 
         callback(data);
@@ -343,7 +381,7 @@ async function placeData(wd) {
         h = h ? h : 12;
 
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
-        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon) + "\"></i></td>";
+        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
     });
@@ -366,7 +404,7 @@ async function placeData(wd) {
 
     $("#hourlyTbl").html(hourlyTable);
 
-
+    $(".forecastList").html(null);
 
     $.each(wd.nwsdata.forecast, await function (key, val) {
         var dName = val.dayName;
@@ -392,7 +430,7 @@ async function placeData(wd) {
         <div class=\"card card-body\">
         <div class=\"align-items-left\">
         <div class=\"col text-center\">
-            <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon) + `\"></i></p>
+            <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
             <p class="forecastShortFont">` + val.shortForecast + `</p>
         </div>
