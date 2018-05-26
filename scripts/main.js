@@ -73,23 +73,24 @@ async function locationSuccess(callback) {
         };
 
         console.log("Starting weather data gather...");
-        console.log("Gathing data from OpenWeatherMap for current weather...");
-        await getCurrentWeather(allWeatherData.location, async function (owm) {
-            allWeatherData.owmdata = owm;
-
-            allWeatherData.nwsdata = {
-                "afd": {},
-                "alerts": {},
-                "hrs": {},
-                "forecast": {}
-            };
 
             await getPointData(allWeatherData.location, async function (nwsbegin) {
+                allWeatherData.nwsdata = {
+                    "afd": {},
+                    "alerts": {},
+                    "current": {},
+                    "hrs": {},
+                    "forecast": {},
+                    "point": {}
+                };
+
+                allWeatherData.nwsdata.point = nwsbegin;
+
                 console.log("Grabbing point data from NWS...");
                 console.log(nwsbegin);
 
                 await getAlertsData(nwsbegin, async function (alert) {
-
+                    console.log("Gathing alerts in the area from NWS...");
                     allWeatherData.nwsdata.alerts = alert;
 
                     await getAFDList(nwsbegin, async function (afd) {
@@ -103,9 +104,9 @@ async function locationSuccess(callback) {
                             };
 
                             await getHourlyForecast(nwsbegin, async function (hrly) {
-                                console.log("Getting hourly forecast data from NWS...");
+                                console.log("Getting current weather and hourly forecast data from NWS...");
                                 var returnHourly = [];
-                                $.each(hrly.properties.periods.slice(0, 12), async function (key, val) {
+                                $.each(hrly.properties.periods.slice(0, 13), async function (key, val) {
                                     returnHourly.push({
                                         "hour": val.startTime,
                                         "temp": val.temperature,
@@ -138,7 +139,6 @@ async function locationSuccess(callback) {
                 });
             })
         });
-    });
 
     /*
     console.log(allWeatherData.location);
@@ -168,7 +168,8 @@ async function getPointData(point, callback) {
             "office": data.properties.cwa,
             "county": data.properties.county,
             "forecast": data.properties.forecast,
-            "hrfore": data.properties.forecastHourly
+            "hrfore": data.properties.forecastHourly,
+            "properties": data.properties
         });
     });
 }
@@ -247,7 +248,6 @@ async function addWeatherData(weatherData) {
     console.log("Adding weather data to DB...");
     await localforage.setItem(new Date().getTime().toString(), {
         "location": weatherData.location,
-        "owmdata": weatherData.owmdata,
         "nwsdata": weatherData.nwsdata
     }).then(async function (value) {
         console.log(value);
@@ -295,10 +295,10 @@ async function getLastSavedWeatherData(callback) {
 
 async function placeData(wd) {
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi wi-owm-" + wd.owmdata.currentConditionIcon + "\"></i>");
-    $(".currentCondition").text(wd.owmdata.currentCondition);
-    $("#WhereAmI").text(wd.owmdata.currentLocation);
-    $(".currentTemp").html(wd.owmdata.currentTemp + " &#8457;");
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon) + "\"></i>");
+    $(".currentCondition").text(wd.nwsdata.hrs[0].condition);
+    $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
+    $(".currentTemp").html(wd.nwsdata.hrs[0].temp + " &#8457;");
 
     $("#afdText").html(wd.nwsdata.afd.productText);
 
@@ -335,17 +335,17 @@ async function placeData(wd) {
         });
     }
 
-    $.each(wd.nwsdata.hrs, await function (key, val) {
+    $.each(wd.nwsdata.hrs.slice(1,13), await function (key, val) {
         var h = new Date(val.hour).getHours();
         var ampm = h >= 12 ? 'PM' : 'AM';
 
         h = h % 12;
         h = h ? h : 12;
 
-        hourlyHours += "<th scope=\"col\">" + h + " " + ampm + "</th>";
-        hourlyIcons += "<td><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon) + "\"></i></td>";
-        hourlyTemps += "<td><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
-        hourlyConditions += "<td><p>" + val.condition + "</p></td>";
+        hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
+        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon) + "\"></i></td>";
+        hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
+        hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
     });
     var hourlyTable = `
         <table class="table table-borderless">
