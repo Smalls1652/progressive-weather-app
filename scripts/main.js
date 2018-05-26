@@ -79,6 +79,7 @@ async function locationSuccess(callback) {
 
             allWeatherData.nwsdata = {
                 "afd": {},
+                "alerts": {},
                 "hrs": {},
                 "forecast": {}
             };
@@ -87,44 +88,50 @@ async function locationSuccess(callback) {
                 console.log("Grabbing point data from NWS...");
                 console.log(nwsbegin);
 
-                await getAFDList(nwsbegin, async function (afd) {
+                await getAlertsData(nwsbegin, async function (alert) {
 
-                    console.log("Getting the most recent AFD text from the local NWS office...");
-                    
-                    await getAFDText(afd['@graph'][0].id, async function (afdtext) {
-                        allWeatherData.nwsdata.afd = {
-                            "issuedTime": afdtext.issuanceTime,
-                            "productText": afdtext.productText.replace(/\\n/g, "<br />")
-                        };
-                        
-                        await getHourlyForecast(nwsbegin, async function (hrly) {
-                            console.log("Getting hourly forecast data from NWS...");
-                            var returnHourly = [];
-                            $.each(hrly.properties.periods.slice(0, 12), async function (key, val) {
-                                returnHourly.push({
-                                    "hour": val.startTime,
-                                    "temp": val.temperature,
-                                    "icon": val.icon,
-                                    "condition": val.shortForecast
-                                });
-                            });
+                    allWeatherData.nwsdata.alerts = alert;
 
-                            allWeatherData.nwsdata.hrs = returnHourly;
-                            await getNextFiveDays(nwsbegin, async function (weekataglance) {
-                                console.log("Getting the next five days from NWS...");
-                                var returnData = [];
-                                $.each(weekataglance.properties.periods, async function (key, val) {
-                                    returnData.push({
-                                        "dayName": val.name,
-                                        "isDaytime": val.isDaytime,
-                                        "icon": val.icon,
+                    await getAFDList(nwsbegin, async function (afd) {
+
+                        console.log("Getting the most recent AFD text from the local NWS office...");
+
+                        await getAFDText(afd['@graph'][0].id, async function (afdtext) {
+                            allWeatherData.nwsdata.afd = {
+                                "issuedTime": afdtext.issuanceTime,
+                                "productText": afdtext.productText.replace(/\\n/g, "<br />")
+                            };
+
+                            await getHourlyForecast(nwsbegin, async function (hrly) {
+                                console.log("Getting hourly forecast data from NWS...");
+                                var returnHourly = [];
+                                $.each(hrly.properties.periods.slice(0, 12), async function (key, val) {
+                                    returnHourly.push({
+                                        "hour": val.startTime,
                                         "temp": val.temperature,
-                                        "detailedForecast": val.detailedForecast
+                                        "icon": val.icon,
+                                        "condition": val.shortForecast
                                     });
                                 });
-                                allWeatherData.nwsdata.forecast = returnData;
-                                await addWeatherData(allWeatherData);
-                                callback(allWeatherData);
+
+                                allWeatherData.nwsdata.hrs = returnHourly;
+                                await getNextFiveDays(nwsbegin, async function (weekataglance) {
+                                    console.log("Getting the next five days from NWS...");
+                                    var returnData = [];
+                                    $.each(weekataglance.properties.periods, async function (key, val) {
+                                        returnData.push({
+                                            "dayName": val.name,
+                                            "isDaytime": val.isDaytime,
+                                            "icon": val.icon,
+                                            "temp": val.temperature,
+                                            "detailedForecast": val.detailedForecast,
+                                            "shortForecast": val.shortForecast
+                                        });
+                                    });
+                                    allWeatherData.nwsdata.forecast = returnData;
+                                    await addWeatherData(allWeatherData);
+                                    callback(allWeatherData);
+                                });
                             });
                         });
                     });
@@ -159,6 +166,7 @@ async function getPointData(point, callback) {
     $.getJSON(apiCall).done(await function (data) {
         callback({
             "office": data.properties.cwa,
+            "county": data.properties.county,
             "forecast": data.properties.forecast,
             "hrfore": data.properties.forecastHourly
         });
@@ -182,10 +190,22 @@ async function getCurrentWeather(point, callback) {
 
 async function getAFDList(apiCall, callback) {
 
-	console.log(apiCall.office);
+    console.log(apiCall.office);
     $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await function (data) {
-    	console.log(data);
+        console.log(data);
         callback(data);
+
+    });
+
+}
+
+async function getAlertsData(apiCall, callback) {
+
+    $.getJSON(apiCall.county, async function (data) {
+
+        $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await function (aldt) { 
+            callback(aldt);
+        });
 
     });
 
@@ -279,13 +299,41 @@ async function placeData(wd) {
     $(".currentCondition").text(wd.owmdata.currentCondition);
     $("#WhereAmI").text(wd.owmdata.currentLocation);
     $(".currentTemp").html(wd.owmdata.currentTemp + " &#8457;");
-    
+
     $("#afdText").html(wd.nwsdata.afd.productText);
 
     var hourlyHours = "";
     var hourlyIcons = "";
     var hourlyTemps = "";
     var hourlyConditions = "";
+
+    $("#weatherAlerts").html(null);
+
+    if(wd.nwsdata.alerts.features)
+    {
+        $.each(wd.nwsdata.alerts.features, await function (key, val) {
+            console.log("Placing alert" + val.properties.headline);
+            var alertLevel;
+            if (val.properties.severity == "Minor")
+            {
+                alertLevel = "alert-secondary";
+            }
+            else if (val.properties.severity == "Severe")
+            {
+                alertLevel = "alert-danger";
+            }
+            else
+            {
+                alertLevel = "alert-warning";
+            }
+
+            var alertCode = `
+            <div class="alert ` + alertLevel + `" role="alert">` + val.properties.headline + `</div>
+            `;
+
+            $("#weatherAlerts").append(alertCode);
+        });
+    }
 
     $.each(wd.nwsdata.hrs, await function (key, val) {
         var h = new Date(val.hour).getHours();
@@ -335,7 +383,7 @@ async function placeData(wd) {
 
         var forecastCardCode = `
         <div class="pb-3 col-sm-6 col-md-6 flex-column flex-fill">
-        <div class="card">
+        <div class="card forecastCard">
         <div class="card-header">
         <h4>
         <a role="button" href=\"#forecast` + dateName + `\" data-toggle=\"collapse\" data-target=\"#forecast` + dateName + `\" aria-expanded=\"false\" aria-controls=\"forecast` + dateName + `\">` + val.dayName + `</a>
@@ -346,6 +394,7 @@ async function placeData(wd) {
         <div class=\"col text-center\">
             <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
+            <p class="forecastShortFont">` + val.shortForecast + `</p>
         </div>
     </div>
         <div class=\"collapse\" id=\"forecast` + dateName + `\">

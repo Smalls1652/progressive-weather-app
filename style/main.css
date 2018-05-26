@@ -64,10 +64,6 @@ body {
     font-size: 6rem;
 }
 
-.forecasticon {
-    font-size: 3rem;
-}
-
 .refreshIcon {
     font-size: 1.5rem;
 }
@@ -83,12 +79,20 @@ body {
     font-size: 2rem;
 }
 
-.shortForecastFont {
-    font-size: 0.5rem;
+.forecastCard {
+    min-height: 300px;
+}
+
+.forecasticon {
+    font-size: 3rem;
 }
 
 .forecastTempFont {
     font-size: 2rem;
+}
+
+.forecastShortFont {
+    font-size: .88rem;
 }
 
 .forecastFont {
