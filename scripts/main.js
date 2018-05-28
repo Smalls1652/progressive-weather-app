@@ -376,10 +376,12 @@ async function placeData(wd) {
             $("#alert-" + val.properties.id).click(function (){
                 if (!($("#collpasedAlert-" + val.properties.id).hasClass("show"))) {
                     $("#collpasedAlert-" + val.properties.id).collapse("show");
+                    $("html,body").animate({scrollTop: ($("#alert-" + val.properties.id).offset().top - 85)});
                 }
                 else
                 {
                     $("#collpasedAlert-" + val.properties.id).collapse("hide");
+                    $("html,body").animate({scrollTop: ($("#alert-" + val.properties.id).offset().top - 85)});
                 }
             });
 
@@ -472,10 +474,12 @@ async function placeData(wd) {
         $("#fCard-" + dateName).click(function (){
             if (!($("#forecast-" + dateName).hasClass("show"))) {
                 $("#forecast-" + dateName).collapse("show");
+                $("html,body").animate({scrollTop: ($("#fCard-" + dateName).offset().top - 85)});
             }
             else
             {
                 $("#forecast-" + dateName).collapse("hide");
+                $("html,body").animate({scrollTop: ($("#fCard-" + dateName).offset().top - 85)});
             }
         });
     });
