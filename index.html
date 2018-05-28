@@ -104,17 +104,16 @@
 
     <script>
         $(document).ready(async function () {
-            await getLastSavedWeatherData(async function (initdata) {
-                console.log("Placing inital load data...");
-                await placeData(initdata);
-                if (o.timeSince < 1) {
-                    $(".lastUpdated").text("(Last updated: A few moments ago)");
-                }
-                else {
-                    $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
-                }
-                console.log("Done.")
-                await checkLocalWeatherData(async function (o) {
+            await checkLocalWeatherData(async function (o) {
+                await getLastSavedWeatherData(async function (initdata) {
+                    console.log("Placing inital load data...");
+                    await placeData(initdata);
+                    if (o.timeSince < 1) {
+                        $(".lastUpdated").text("(Last updated: A few moments ago)");
+                    }
+                    else {
+                        $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                    }
                     if (o.old == true) {
                         console.log("Data is either old or doesn't exist. Loading new data...");
                         await locationSuccess(async function (awd) {
