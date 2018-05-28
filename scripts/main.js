@@ -433,7 +433,7 @@ async function placeData(wd) {
         }
 
         var forecastCardCode = `
-        <div class="pb-3 pl-0 pr-0 col-sm-6 col-md-6 flex-column flex-fill">
+        <div class="pb-3 pl-0 col-sm-6 col-md-6 flex-column flex-fill">
         <div class="card forecastCard">
         <div class="card-header">
         <h4>
