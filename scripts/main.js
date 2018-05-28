@@ -394,7 +394,7 @@ async function placeData(wd) {
         h = h ? h : 12;
 
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
-        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + await shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
+        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
     });
@@ -443,7 +443,7 @@ async function placeData(wd) {
         <div class=\"card card-body\">
         <div class="row">
         <div class=\"col-5 text-center\">
-            <p><i class=\"forecasticon wi ` + await shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
+            <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
         </div>
         <div class="col align-self-center">
