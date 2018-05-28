@@ -449,7 +449,7 @@ async function placeData(wd) {
             <p class="forecastShortFont">` + val.shortForecast + `</p>
         </div>
     </div>
-        <div class=\"collapse\" id=\"forecast` + dateName + `\">
+        <div class=\"collapse\" id=\"forecast-` + dateName + `\">
                 <div>
                     <div class="\col\">
                         <hr>
