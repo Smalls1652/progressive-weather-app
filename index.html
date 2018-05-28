@@ -73,7 +73,7 @@
             <div id="weatherAlerts" class="col"></div>
         </div>
         <div class="row">
-            <div class="col-lg-6 pb-3">
+            <div class="col-xl-6 pb-3">
                 <h3>
                     <a role="button" href="#afdCard" data-toggle="collapse" data-target="#afdCard" aria-expanded="false" aria-controls="#afdCard">Area Forecast Discussion</a>
                     </h5>
@@ -144,12 +144,12 @@
             });
         });
 
-        if ($(window).width() < 992) {
+        if ($(window).width() < 1024) {
             $("#afdCard").removeClass("show");
         }
 
         $(window).resize(function () {
-            if ($(window).width() < 992) {
+            if ($(window).width() < 1024) {
                 $("#afdCard").removeClass("show");
             }
             else {
