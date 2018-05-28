@@ -442,7 +442,7 @@ async function placeData(wd) {
         </div>
         <div class=\"card card-body\">
         <div class="row">
-        <div class=\"col-5 text-center\">
+        <div class=\"col-lg-7 col-5 text-center\">
             <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
         </div>
