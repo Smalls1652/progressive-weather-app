@@ -83,6 +83,10 @@ body {
     min-height: 200px;
 }
 
+.forecastCard :hover {
+    cursor: pointer;
+}
+
 .forecasticon {
     font-size: 2.5rem;
 }
@@ -116,6 +120,10 @@ body {
 
 .alertCard {
     white-space: pre-line;
+}
+
+.alertCard :hover {
+    cursor: pointer;
 }
 
 .hourlyList {
