@@ -434,10 +434,9 @@ async function placeData(wd) {
 
         var forecastCardCode = `
         <div class="pb-3 pl-1 pr-1 col-sm-6 col-md-6 flex-column flex-fill">
-        <div class="card forecastCard">
+        <div id="fCard-` + dateName + `" class="card forecastCard">
         <div class="card-header">
-        <h4>
-        <a role="button" href=\"#forecast` + dateName + `\" data-toggle=\"collapse\" data-target=\"#forecast` + dateName + `\" aria-expanded=\"false\" aria-controls=\"forecast` + dateName + `\">` + val.dayName + `</a>
+        <h4>` + val.dayName + `
         </h4>
         </div>
         <div class=\"card card-body\">
@@ -469,6 +468,16 @@ async function placeData(wd) {
         //$(".forecastList").append("<h4><a role=\"button\" href=\"#forecast" + dateName + "\" data-toggle=\"collapse\" data-target=\"#forecast" + dateName + "\" aria-expanded=\"false\" aria-controls=\"forecast" + dateName + "\">" + val.name + "</a></h4>");
         //$(".forecastList").append("<div class=\"card card-body\"><div class=\"row align-items-center\"><div class=\"col text-left\"><img src=\"" + val.icon + "\"></div><span class=\"border-right\"></span><div class=\"col text-left forecastFont\"><p class=\"currentCondition\">" + val.shortForecast + "</p><p class=\"currentTemp\">" + val.temperature + " &#8457;</p></div></div></div></div>");
         $(".forecastList").append(forecastCardCode);
+
+        $("#fCard-" + dateName).click(function (){
+            if (!($("#forecast-" + dateName).hasClass("show"))) {
+                $("#forecast-" + dateName).collapse("show");
+            }
+            else
+            {
+                $("#forecast-" + dateName).collapse("hide");
+            }
+        });
     });
 }
 
