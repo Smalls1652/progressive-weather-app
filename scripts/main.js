@@ -393,7 +393,6 @@ async function placeData(wd) {
         h = h % 12;
         h = h ? h : 12;
 
-        console.log(h + " " + ampm + " isDaytime:" + val.isDayTime);
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
         hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + await shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
