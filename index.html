@@ -90,7 +90,8 @@
             </div>
         </div>
         <div class="row">
-            <p class="footerText">All weather data provided by the US <a href="https://weather.gov">National Weather Service</a> API.</p>
+            <p class="footerText">All weather data provided by the US
+                <a href="https://weather.gov">National Weather Service</a> API.</p>
 
         </div>
     </div>
@@ -103,30 +104,30 @@
 
     <script>
         $(document).ready(async function () {
-            await checkLocalWeatherData(async function (o) {
-                if (o.old == true) {
-                    console.log("Data is either old or doesn't exist. Loading new data...");
-                    await locationSuccess(async function (awd) {
-                        console.log("Checking the DB for new data...");
-                        await getLastSavedWeatherData(async function (data) {
-                            console.log("Placing data...");
-                            await placeData(data);
-                            $(".lastUpdated").text("(Last updated: Just Now)");
-                        });
-                        console.log("Done.")
-                    });
+            await getLastSavedWeatherData(async function (initdata) {
+                console.log("Placing inital load data...");
+                await placeData(initdata);
+                if (o.timeSince < 1) {
+                    $(".lastUpdated").text("(Last updated: A few moments ago)");
                 }
                 else {
-                    await getLastSavedWeatherData(async function (initdata) {
-                        console.log("Placing inital load data...");
-                        await placeData(initdata);
-                        if (o.timeSince < 1) {
-                            $(".lastUpdated").text("(Last updated: A few moments ago)");
-                        }
-                        else {
-                            $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
-                        }
-                        console.log("Done.")
+                    $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                }
+                console.log("Done.")
+                await checkLocalWeatherData(async function (o) {
+                    if (o.old == true) {
+                        console.log("Data is either old or doesn't exist. Loading new data...");
+                        await locationSuccess(async function (awd) {
+                            console.log("Checking the DB for new data...");
+                            await getLastSavedWeatherData(async function (data) {
+                                console.log("Placing data...");
+                                await placeData(data);
+                                $(".lastUpdated").text("(Last updated: Just Now)");
+                            });
+                            console.log("Done.")
+                        });
+                    }
+                    else {
                         console.log("Checking the DB for last good data...");
                         await getLastSavedWeatherData(async function (data) {
                             console.log("Placing data...");
@@ -139,8 +140,8 @@
                             }
                             console.log("Done.")
                         });
-                    });
-                }
+                    }
+                });
             });
         });
 
