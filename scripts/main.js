@@ -433,7 +433,7 @@ async function placeData(wd) {
         }
 
         var forecastCardCode = `
-        <div class="pb-3 col-sm-6 col-md-6 flex-column flex-fill">
+        <div class="pb-3 pl-0 pr-0 col-sm-6 col-md-6 flex-column flex-fill">
         <div class="card forecastCard">
         <div class="card-header">
         <h4>
@@ -442,11 +442,11 @@ async function placeData(wd) {
         </div>
         <div class=\"card card-body\">
         <div class="row">
-        <div class=\"col-lg-7 col-5 text-center\">
+        <div class=\"col-lg-4 col-4 p-0 text-center\">
             <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
         </div>
-        <div class="col align-self-center">
+        <div class="col p-0 align-self-center">
             <p class="forecastShortFont">` + val.shortForecast + `</p>
         </div>
     </div>
