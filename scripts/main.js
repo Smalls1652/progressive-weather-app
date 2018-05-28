@@ -6,13 +6,15 @@ function shortForecastIcon(condition, daynight) {
     //console.log(condition);
 
     var t;
+    /*
     if (daynight) {
-        t = "day";
+        console.log("I'll choose day!");
     }
     else
     {
-        t = "night";
+        console.log("I'll choose night!");
     }
+    */
 
     if (/(tsra)/i.test(condition)) {
         //console.log("Thunderstorms");
@@ -349,7 +351,7 @@ async function placeData(wd) {
 
     if(wd.nwsdata.alerts.features)
     {
-        $.each(wd.nwsdata.alerts.features, await function (key, val) {
+        $.each(wd.nwsdata.alerts.features, async function (key, val) {
             console.log("Placing alert" + val.properties.headline);
             var alertLevel;
             if (val.properties.severity == "Minor")
@@ -366,22 +368,34 @@ async function placeData(wd) {
             }
 
             var alertCode = `
-            <div class="alert ` + alertLevel + `" role="alert">` + val.properties.headline + `</div>
+            <div id="alert-` + val.properties.id + `" class="alertCard alert ` + alertLevel + `" role="alert">` + val.properties.headline + `<div id="collpasedAlert-` + val.properties.id + `" class="collapse">
+            ` + val.properties.description + `</div></div>
             `;
 
             $("#weatherAlerts").append(alertCode);
+            $("#alert-" + val.properties.id).click(function (){
+                if (!($("#collpasedAlert-" + val.properties.id).hasClass("show"))) {
+                    $("#collpasedAlert-" + val.properties.id).collapse("show");
+                }
+                else
+                {
+                    $("#collpasedAlert-" + val.properties.id).collapse("hide");
+                }
+            });
+
         });
     }
 
-    $.each(wd.nwsdata.hrs.slice(1,13), await function (key, val) {
+    $.each(wd.nwsdata.hrs.slice(1,13), async function (key, val) {
         var h = new Date(val.hour).getHours();
         var ampm = h >= 12 ? 'PM' : 'AM';
 
         h = h % 12;
         h = h ? h : 12;
 
+        console.log(h + " " + ampm + " isDaytime:" + val.isDayTime);
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
-        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
+        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + await shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
     });
@@ -406,7 +420,7 @@ async function placeData(wd) {
 
     $(".forecastList").html(null);
 
-    $.each(wd.nwsdata.forecast, await function (key, val) {
+    $.each(wd.nwsdata.forecast, async function (key, val) {
         var dName = val.dayName;
         var dateName = val.dayName.replace(/\s/g, '');
 
@@ -428,10 +442,12 @@ async function placeData(wd) {
         </h4>
         </div>
         <div class=\"card card-body\">
-        <div class=\"align-items-left\">
-        <div class=\"col text-center\">
-            <p><i class=\"forecasticon wi ` + shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
+        <div class="row">
+        <div class=\"col-5 text-center\">
+            <p><i class=\"forecasticon wi ` + await shortForecastIcon(val.icon, val.isDaytime) + `\"></i></p>
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
+        </div>
+        <div class="col align-self-center">
             <p class="forecastShortFont">` + val.shortForecast + `</p>
         </div>
     </div>

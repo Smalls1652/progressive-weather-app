@@ -80,7 +80,7 @@ body {
 }
 
 .forecastCard {
-    min-height: 300px;
+    min-height: 200px;
 }
 
 .forecasticon {
@@ -92,7 +92,7 @@ body {
 }
 
 .forecastShortFont {
-    font-size: .88rem;
+    font-size: .85rem;
 }
 
 .forecastFont {
@@ -111,7 +111,11 @@ body {
 
 .afdFont {
     font-size: 1rem;
-    white-space: pre;
+    white-space: pre-wrap;
+}
+
+.alertCard {
+    white-space: pre-line;
 }
 
 .hourlyList {
