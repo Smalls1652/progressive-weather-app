@@ -144,12 +144,12 @@
             });
         });
 
-        if ($(window).width() <= 1366) {
+        if ($(window).width() < 1365) {
             $("#afdCard").removeClass("show");
         }
 
         $(window).resize(function () {
-            if ($(window).width() <= 1366) {
+            if ($(window).width() < 1365) {
                 $("#afdCard").removeClass("show");
             }
             else {
