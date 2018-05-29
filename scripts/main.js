@@ -424,6 +424,16 @@ async function placeData(wd) {
             highlow = "lowTemp";
         }
 
+        var pctChanceString;
+
+        if(val.detailedForecast.test(/Chance of precipitation is (.*)%\./))
+        {
+            var pctChance = (/Chance of precipitation is (.*)%\./).exec(val.detailedForecast)[1];
+
+            pctChanceString = "(Chance is " + pctChance + "%)";
+
+        }
+
         var forecastCardCode = `
         <div id="fCard-` + dateName + `" class="pb-3 pl-1 pr-1 col-sm-6 col-md-6 flex-column flex-fill">
         <div class="card forecastCard">
@@ -438,7 +448,7 @@ async function placeData(wd) {
             <p class=\"forecastTempFont ` + highlow + `\">` + val.temp + ` &#8457;</p>
         </div>
         <div class="col p-0 align-self-center">
-            <p class="forecastShortFont">` + val.shortForecast + `</p>
+            <p class="forecastShortFont">` + val.shortForecast + ` ` + pctChanceString + `</p>
         </div>
     </div>
         <div class=\"collapse\" id=\"forecast-` + dateName + `\">
