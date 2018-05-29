@@ -426,7 +426,7 @@ async function placeData(wd) {
 
         var pctChanceString;
 
-        if((/Chance of precipitation is (.*)%\./).test(val.detailedForecast.test))
+        if((/Chance of precipitation is (.*)%\./).test(val.detailedForecast))
         {
             var pctChance = (/Chance of precipitation is (.*)%\./).exec(val.detailedForecast)[1];
 
