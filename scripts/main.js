@@ -435,7 +435,7 @@ async function placeData(wd) {
         }
         else
         {
-            pctChanceString = null;
+            pctChanceString = "";
         }
 
         var forecastCardCode = `
