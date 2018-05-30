@@ -485,10 +485,6 @@ async function placeData(wd) {
             }
             else {
                 $("#forecast-" + dateName).collapse("hide");
-                if ($(window).width() < 1365 && ( ($(window).scrollTop() > $("#fCard-" + dateName).offset().top) && ($(window).scrollTop() < $("#fCard-" + dateName).offset().top) )) {
-                    //$("#fCard-" + dateName).removeClass("forecastCardExpanded");
-                    $("html,body").animate({ scrollTop: ($("#fCard-" + dateName).offset().top - $("body").css("padding-top").replace("px", "") - 5) });
-                }
             }
         });
     });
