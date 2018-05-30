@@ -433,6 +433,10 @@ async function placeData(wd) {
             pctChanceString = "(Chance is " + pctChance + "%)";
 
         }
+        else
+        {
+            pctChanceString = null;
+        }
 
         var forecastCardCode = `
         <div id="fCard-` + dateName + `" class="pb-3 pl-1 pr-1 col-sm-6 col-md-6 flex-column flex-fill">
