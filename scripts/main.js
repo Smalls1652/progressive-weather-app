@@ -330,7 +330,7 @@ async function getLastSavedWeatherData(callback) {
 
 async function placeData(wd) {
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon, val.isDayTime) + "\"></i>");
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon, wd.nwsdata.hrs[0].isDaytime) + "\"></i>");
     $(".currentCondition").text(wd.nwsdata.hrs[0].condition);
     $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
     $(".currentTemp").html(wd.nwsdata.hrs[0].temp + " &#8457;");
