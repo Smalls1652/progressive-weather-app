@@ -330,7 +330,7 @@ async function getLastSavedWeatherData(callback) {
 
 async function placeData(wd) {
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon) + "\"></i>");
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon, val.isDayTime) + "\"></i>");
     $(".currentCondition").text(wd.nwsdata.hrs[0].condition);
     $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
     $(".currentTemp").html(wd.nwsdata.hrs[0].temp + " &#8457;");
@@ -386,7 +386,7 @@ async function placeData(wd) {
         h = h ? h : 12;
 
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
-        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDaytime) + "\"></i></td>";
+        hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDayTime) + "\"></i></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
     });
