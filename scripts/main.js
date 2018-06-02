@@ -111,8 +111,8 @@ async function locationSuccess(callback) {
             console.log("Grabbing point data from NWS...");
             console.log(nwsbegin);
 
-            await getCurrentWeather(nwsbegin, async function (observ) {
-                allWeatherData.current = observ;
+            await getCurrentWeather(nwsbegin, async function (curweather) {
+                allWeatherData.nwsdata.current = curweather;
 
                 await getAlertsData(nwsbegin, async function (alert) {
                     console.log("Gathing alerts in the area from NWS...");
@@ -191,24 +191,30 @@ async function getPointData(point, callback) {
     var apiCall = "https://api.weather.gov/points/" + point.latitude + "," + point.longitude;
 
     $.getJSON(apiCall).done(await function (data) {
-            callback({
-                "office": data.properties.cwa,
-                "county": data.properties.county,
-                "forecast": data.properties.forecast,
-                "hrfore": data.properties.forecastHourly,
-                "stations": data.properties.observationStations,
-                "properties": data.properties
-            });
+        callback({
+            "office": data.properties.cwa,
+            "county": data.properties.county,
+            "forecast": data.properties.forecast,
+            "hrfore": data.properties.forecastHourly,
+            "stations": data.properties.observationStations,
+            "properties": data.properties
         });
+    });
 }
 
 async function getCurrentWeather(apiCall, callback) {
 
-    $.getJSON(apiCall.stations).done(async function (data) {
-            $.getJSON(data.features[0].id + "/observations/current").done(await function (obsv) {
-                    callback(obsv);
+    $.getJSON(apiCall.stations, async function (data) {
+        $.getJSON(data.features[0].id + "/observations/current", await function (d2) {
+            console.log(d2);
+            var curtemp = d2.properties.temperature.value;
+            callback({
+                    "icon": d2.properties.icon,
+                    "temperature": curtemp,
+                    "textCondition": d2.properties.textCondition
                 });
         });
+    });
 
 }
 
@@ -216,10 +222,10 @@ async function getAFDList(apiCall, callback) {
 
     console.log(apiCall.office);
     $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await function (data) {
-            console.log(data);
-            callback(data);
+        console.log(data);
+        callback(data);
 
-        });
+    });
 
 }
 
@@ -228,8 +234,8 @@ async function getAlertsData(apiCall, callback) {
     $.getJSON(apiCall.county, async function (data) {
 
         $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await function (aldt) {
-                callback(aldt);
-            });
+            callback(aldt);
+        });
 
     });
 
@@ -239,9 +245,9 @@ async function getAFDText(apiCall, callback) {
 
     $.getJSON("https://api.weather.gov/products/" + apiCall, await function (data) {
 
-            callback(data);
+        callback(data);
 
-        });
+    });
 
 }
 
@@ -249,9 +255,9 @@ async function getHourlyForecast(apiCall, callback) {
 
     $.getJSON(apiCall.hrfore, await function (data) {
 
-            callback(data);
+        callback(data);
 
-        });
+    });
 
 }
 
@@ -259,9 +265,9 @@ async function getNextFiveDays(apiCall, callback) {
 
     $.getJSON(apiCall.forecast, await function (data) {
 
-            callback(data);
+        callback(data);
 
-        });
+    });
 
 }
 
@@ -306,8 +312,8 @@ async function getLastSavedWeatherData(callback) {
     await localforage.length().then(async function (numofkeys) {
         await localforage.key(numofkeys - 1).then(async function (keyname) {
             localforage.getItem(keyname).then(await function (value) {
-                    callback(value);
-                });
+                callback(value);
+            });
         });
     });
 
@@ -315,10 +321,10 @@ async function getLastSavedWeatherData(callback) {
 
 async function placeData(wd) {
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.current.properties.icon, true) + "\"></i>");
-    $(".currentCondition").text(wd.nwsdata.current.properties.textCondition);
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.current.icon, true) + "\"></i>");
+    $(".currentCondition").text(wd.nwsdata.current.textCondition);
     $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
-    $(".currentTemp").html((Math.round(wd.nwsdata.current.properties.temperature.value * 1.8 + 32)) + " &#8457;");
+    $(".currentTemp").html((Math.round(wd.nwsdata.current.temperature * 1.8 + 32)) + " &#8457;");
 
     $("#afdText").html(wd.nwsdata.afd.productText);
 
