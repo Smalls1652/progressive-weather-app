@@ -190,8 +190,7 @@ async function getPointData(point, callback) {
 
     var apiCall = "https://api.weather.gov/points/" + point.latitude + "," + point.longitude;
 
-    $.getJSON(apiCall).done(await
-        function (data) {
+    $.getJSON(apiCall).done(await function (data) {
             callback({
                 "office": data.properties.cwa,
                 "county": data.properties.county,
@@ -205,8 +204,7 @@ async function getPointData(point, callback) {
 
 async function getCurrentWeather(apiCall, callback) {
 
-    $.getJSON(apiCall.stations).done(await
-        function (data) {
+    $.getJSON(apiCall.stations).done(await function (data) {
             $.getJSON(data.features[0].id + "/observations/current").done(await function (obsv) {
                     callback(obsv);
                 });
@@ -217,8 +215,7 @@ async function getCurrentWeather(apiCall, callback) {
 async function getAFDList(apiCall, callback) {
 
     console.log(apiCall.office);
-    $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await
-        function (data) {
+    $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await function (data) {
             console.log(data);
             callback(data);
 
@@ -230,8 +227,7 @@ async function getAlertsData(apiCall, callback) {
 
     $.getJSON(apiCall.county, async function (data) {
 
-        $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await
-            function (aldt) {
+        $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await function (aldt) {
                 callback(aldt);
             });
 
@@ -241,8 +237,7 @@ async function getAlertsData(apiCall, callback) {
 
 async function getAFDText(apiCall, callback) {
 
-    $.getJSON("https://api.weather.gov/products/" + apiCall, await
-        function (data) {
+    $.getJSON("https://api.weather.gov/products/" + apiCall, await function (data) {
 
             callback(data);
 
@@ -252,8 +247,7 @@ async function getAFDText(apiCall, callback) {
 
 async function getHourlyForecast(apiCall, callback) {
 
-    $.getJSON(apiCall.hrfore, await
-        function (data) {
+    $.getJSON(apiCall.hrfore, await function (data) {
 
             callback(data);
 
@@ -263,8 +257,7 @@ async function getHourlyForecast(apiCall, callback) {
 
 async function getNextFiveDays(apiCall, callback) {
 
-    $.getJSON(apiCall.forecast, await
-        function (data) {
+    $.getJSON(apiCall.forecast, await function (data) {
 
             callback(data);
 
@@ -312,8 +305,7 @@ async function checkLocalWeatherData(callback) {
 async function getLastSavedWeatherData(callback) {
     await localforage.length().then(async function (numofkeys) {
         await localforage.key(numofkeys - 1).then(async function (keyname) {
-            localforage.getItem(keyname).then(await
-                function (value) {
+            localforage.getItem(keyname).then(await function (value) {
                     callback(value);
                 });
         });
