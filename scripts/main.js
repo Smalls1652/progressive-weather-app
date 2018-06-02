@@ -19,65 +19,51 @@ function shortForecastIcon(condition, daynight) {
     if (/(tsra)/i.test(condition)) {
         //console.log("Thunderstorms");
         return "wi-thunderstorm";
-    }
-    else if (/(few)/i.test(condition)) {
+    } else if (/(few)/i.test(condition)) {
         //console.log("Partly Cloudy");
         if (daynight) {
             return "wi-day-sunny-overcast";
-        }
-        else {
+        } else {
             return "wi-night-alt-partly-cloudy";
         }
-    }
-    else if (/(bkn)/i.test(condition)) {
+    } else if (/(bkn)/i.test(condition)) {
         //console.log("Mostly Cloudy");
         if (daynight) {
             return "wi-day-sunny-overcast";
-        }
-        else {
+        } else {
             return "wi-night-alt-partly-cloudy";
         }
-    }
-    else if (/(sct)/i.test(condition)) {
+    } else if (/(sct)/i.test(condition)) {
         //console.log("Partly Cloudy");
         if (daynight) {
             return "wi-day-sunny-overcast";
-        }
-        else {
+        } else {
             return "wi-night-alt-partly-cloudy";
         }
-    }
-    else if (/(skc)/i.test(condition)) {
+    } else if (/(skc)/i.test(condition)) {
         //console.log("Sunny");
         if (daynight) {
             return "wi-day-sunny";
-        }
-        else {
+        } else {
             return "wi-night-clear";
         }
-    }
-    else if (/(ovc)/i.test(condition)) {
+    } else if (/(ovc)/i.test(condition)) {
         //console.log("Overcast");
         return "wi-cloud";
-    }
-    else if (/(fg)/i.test(condition)) {
+    } else if (/(fg)/i.test(condition)) {
         //console.log("Fog");
         if (daynight) {
             return "wi-day-fog";
-        }
-        else {
+        } else {
             return "wi-fog";
         }
-    }
-    else if (/(shra)/i.test(condition)) {
+    } else if (/(shra)/i.test(condition)) {
         //console.log("Rain");
         return "wi-showers";
-    }
-    else if (/(rain_showers)/i.test(condition)) {
+    } else if (/(rain_showers)/i.test(condition)) {
         //console.log("Rain");
         return "wi-showers";
-    }
-    else {
+    } else {
         return "wi-na";
     }
 
@@ -125,56 +111,60 @@ async function locationSuccess(callback) {
             console.log("Grabbing point data from NWS...");
             console.log(nwsbegin);
 
-            await getAlertsData(nwsbegin, async function (alert) {
-                console.log("Gathing alerts in the area from NWS...");
-                allWeatherData.nwsdata.alerts = alert;
+            await getCurrentWeather(nwsbegin, async function (observ) {
+                allWeatherData.current = observ;
 
-                await getAFDList(nwsbegin, async function (afd) {
+                await getAlertsData(nwsbegin, async function (alert) {
+                    console.log("Gathing alerts in the area from NWS...");
+                    allWeatherData.nwsdata.alerts = alert;
 
-                    console.log("Getting the most recent AFD text from the local NWS office...");
+                    await getAFDList(nwsbegin, async function (afd) {
 
-                    await getAFDText(afd['@graph'][0].id, async function (afdtext) {
-                        allWeatherData.nwsdata.afd = {
-                            "issuedTime": afdtext.issuanceTime,
-                            "productText": afdtext.productText.replace(/\\n/g, "<br />")
-                        };
+                        console.log("Getting the most recent AFD text from the local NWS office...");
 
-                        await getHourlyForecast(nwsbegin, async function (hrly) {
-                            console.log("Getting current weather and hourly forecast data from NWS...");
-                            var returnHourly = [];
-                            $.each(hrly.properties.periods.slice(0, 13), async function (key, val) {
-                                returnHourly.push({
-                                    "hour": val.startTime,
-                                    "temp": val.temperature,
-                                    "icon": val.icon,
-                                    "condition": val.shortForecast,
-                                    "isDayTime": val.isDaytime
-                                });
-                            });
+                        await getAFDText(afd['@graph'][0].id, async function (afdtext) {
+                            allWeatherData.nwsdata.afd = {
+                                "issuedTime": afdtext.issuanceTime,
+                                "productText": afdtext.productText.replace(/\\n/g, "<br />")
+                            };
 
-                            allWeatherData.nwsdata.hrs = returnHourly;
-                            await getNextFiveDays(nwsbegin, async function (weekataglance) {
-                                console.log("Getting the next five days from NWS...");
-                                var returnData = [];
-                                $.each(weekataglance.properties.periods, async function (key, val) {
-                                    returnData.push({
-                                        "dayName": val.name,
-                                        "isDaytime": val.isDaytime,
-                                        "icon": val.icon,
+                            await getHourlyForecast(nwsbegin, async function (hrly) {
+                                console.log("Getting current weather and hourly forecast data from NWS...");
+                                var returnHourly = [];
+                                $.each(hrly.properties.periods.slice(0, 13), async function (key, val) {
+                                    returnHourly.push({
+                                        "hour": val.startTime,
                                         "temp": val.temperature,
-                                        "detailedForecast": val.detailedForecast,
-                                        "shortForecast": val.shortForecast
+                                        "icon": val.icon,
+                                        "condition": val.shortForecast,
+                                        "isDayTime": val.isDaytime
                                     });
                                 });
-                                allWeatherData.nwsdata.forecast = returnData;
-                                await addWeatherData(allWeatherData);
-                                callback(allWeatherData);
+
+                                allWeatherData.nwsdata.hrs = returnHourly;
+                                await getNextFiveDays(nwsbegin, async function (weekataglance) {
+                                    console.log("Getting the next five days from NWS...");
+                                    var returnData = [];
+                                    $.each(weekataglance.properties.periods, async function (key, val) {
+                                        returnData.push({
+                                            "dayName": val.name,
+                                            "isDaytime": val.isDaytime,
+                                            "icon": val.icon,
+                                            "temp": val.temperature,
+                                            "detailedForecast": val.detailedForecast,
+                                            "shortForecast": val.shortForecast
+                                        });
+                                    });
+                                    allWeatherData.nwsdata.forecast = returnData;
+                                    await addWeatherData(allWeatherData);
+                                    callback(allWeatherData);
+                                });
                             });
                         });
                     });
                 });
-            });
-        })
+            })
+        });
     });
 
     /*
@@ -200,40 +190,39 @@ async function getPointData(point, callback) {
 
     var apiCall = "https://api.weather.gov/points/" + point.latitude + "," + point.longitude;
 
-    $.getJSON(apiCall).done(await function (data) {
-        callback({
-            "office": data.properties.cwa,
-            "county": data.properties.county,
-            "forecast": data.properties.forecast,
-            "hrfore": data.properties.forecastHourly,
-            "properties": data.properties
+    $.getJSON(apiCall).done(await
+        function (data) {
+            callback({
+                "office": data.properties.cwa,
+                "county": data.properties.county,
+                "forecast": data.properties.forecast,
+                "hrfore": data.properties.forecastHourly,
+                "stations": data.properties.observationStations,
+                "properties": data.properties
+            });
         });
-    });
 }
 
-async function getCurrentWeather(point, callback) {
+async function getCurrentWeather(apiCall, callback) {
 
-    var apiCall = "https://api.openweathermap.org/data/2.5/weather?lat=" + point.latitude + "&lon=" + point.longitude + "&appid=" + omwAPI + "&type=accurate&units=imperial";
-
-    $.getJSON(apiCall).done(await function (data) {
-        callback({
-            "currentTemp": Math.round(data.main.temp),
-            "currentCondition": data.weather[0].main,
-            "currentConditionIcon": data.weather[0].id,
-            "currentLocation": data.name
+    $.getJSON(apiCall.stations).done(await
+        function (data) {
+            $.getJSON(data.features[0].id + "/observations/current").done(await function (obsv) {
+                    callback(obsv);
+                });
         });
-    });
 
 }
 
 async function getAFDList(apiCall, callback) {
 
     console.log(apiCall.office);
-    $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await function (data) {
-        console.log(data);
-        callback(data);
+    $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await
+        function (data) {
+            console.log(data);
+            callback(data);
 
-    });
+        });
 
 }
 
@@ -241,9 +230,10 @@ async function getAlertsData(apiCall, callback) {
 
     $.getJSON(apiCall.county, async function (data) {
 
-        $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await function (aldt) {
-            callback(aldt);
-        });
+        $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await
+            function (aldt) {
+                callback(aldt);
+            });
 
     });
 
@@ -251,31 +241,34 @@ async function getAlertsData(apiCall, callback) {
 
 async function getAFDText(apiCall, callback) {
 
-    $.getJSON("https://api.weather.gov/products/" + apiCall, await function (data) {
+    $.getJSON("https://api.weather.gov/products/" + apiCall, await
+        function (data) {
 
-        callback(data);
+            callback(data);
 
-    });
+        });
 
 }
 
 async function getHourlyForecast(apiCall, callback) {
 
-    $.getJSON(apiCall.hrfore, await function (data) {
+    $.getJSON(apiCall.hrfore, await
+        function (data) {
 
-        callback(data);
+            callback(data);
 
-    });
+        });
 
 }
 
 async function getNextFiveDays(apiCall, callback) {
 
-    $.getJSON(apiCall.forecast, await function (data) {
+    $.getJSON(apiCall.forecast, await
+        function (data) {
 
-        callback(data);
+            callback(data);
 
-    });
+        });
 
 }
 
@@ -307,8 +300,7 @@ async function checkLocalWeatherData(callback) {
                     "old": false,
                     "timeSince": timeSince
                 });
-            }
-            else {
+            } else {
                 callback({
                     "old": true,
                 });
@@ -320,9 +312,10 @@ async function checkLocalWeatherData(callback) {
 async function getLastSavedWeatherData(callback) {
     await localforage.length().then(async function (numofkeys) {
         await localforage.key(numofkeys - 1).then(async function (keyname) {
-            localforage.getItem(keyname).then(await function (value) {
-                callback(value);
-            });
+            localforage.getItem(keyname).then(await
+                function (value) {
+                    callback(value);
+                });
         });
     });
 
@@ -330,10 +323,10 @@ async function getLastSavedWeatherData(callback) {
 
 async function placeData(wd) {
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.hrs[0].icon, wd.nwsdata.hrs[0].isDaytime) + "\"></i>");
-    $(".currentCondition").text(wd.nwsdata.hrs[0].condition);
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.current.properties.icon, true) + "\"></i>");
+    $(".currentCondition").text(wd.nwsdata.current.properties.textCondition);
     $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
-    $(".currentTemp").html(wd.nwsdata.hrs[0].temp + " &#8457;");
+    $(".currentTemp").html((Math.round(wd.nwsdata.current.properties.temperature.value * 1.8 + 32)) + " &#8457;");
 
     $("#afdText").html(wd.nwsdata.afd.productText);
 
@@ -350,11 +343,9 @@ async function placeData(wd) {
             var alertLevel;
             if (val.properties.severity == "Minor") {
                 alertLevel = "alert-secondary";
-            }
-            else if (val.properties.severity == "Severe") {
+            } else if (val.properties.severity == "Severe") {
                 alertLevel = "alert-danger";
-            }
-            else {
+            } else {
                 alertLevel = "alert-warning";
             }
 
@@ -367,11 +358,14 @@ async function placeData(wd) {
             $("#alert-" + val.properties.id).click(function () {
                 if (!($("#collpasedAlert-" + val.properties.id).hasClass("show"))) {
                     $("#collpasedAlert-" + val.properties.id).collapse("show");
-                    $("html,body").animate({ scrollTop: ($("#alert-" + val.properties.id).offset().top - $("body").css("padding-top").replace("px", "") - 5) });
-                }
-                else {
+                    $("html,body").animate({
+                        scrollTop: ($("#alert-" + val.properties.id).offset().top - $("body").css("padding-top").replace("px", "") - 5)
+                    });
+                } else {
                     $("#collpasedAlert-" + val.properties.id).collapse("hide");
-                    $("html,body").animate({ scrollTop: ($("#alert-" + val.properties.id).offset().top - $("body").css("padding-top").replace("px", "") - 5) });
+                    $("html,body").animate({
+                        scrollTop: ($("#alert-" + val.properties.id).offset().top - $("body").css("padding-top").replace("px", "") - 5)
+                    });
                 }
             });
 
@@ -419,22 +413,18 @@ async function placeData(wd) {
 
         if (val.isDaytime) {
             highlow = "highTemp";
-        }
-        else {
+        } else {
             highlow = "lowTemp";
         }
 
         var pctChanceString;
 
-        if((/Chance of precipitation is (.*)%\./).test(val.detailedForecast))
-        {
+        if ((/Chance of precipitation is (.*)%\./).test(val.detailedForecast)) {
             var pctChance = (/Chance of precipitation is (.*)%\./).exec(val.detailedForecast)[1];
 
             pctChanceString = "(Chance is " + pctChance + "%)";
 
-        }
-        else
-        {
+        } else {
             pctChanceString = "";
         }
 
@@ -480,10 +470,11 @@ async function placeData(wd) {
                 $("#forecast-" + dateName).collapse("show");
                 if ($(window).width() < 1365) {
                     //$("#fCard-" + dateName).addClass("forecastCardExpanded");
-                    $("html,body").animate({ scrollTop: ($("#fCard-" + dateName).offset().top - $("body").css("padding-top").replace("px", "") - 5) });
+                    $("html,body").animate({
+                        scrollTop: ($("#fCard-" + dateName).offset().top - $("body").css("padding-top").replace("px", "") - 5)
+                    });
                 }
-            }
-            else {
+            } else {
                 $("#forecast-" + dateName).collapse("hide");
             }
         });
