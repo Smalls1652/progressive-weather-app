@@ -204,7 +204,7 @@ async function getPointData(point, callback) {
 
 async function getCurrentWeather(apiCall, callback) {
 
-    $.getJSON(apiCall.stations).done(await function (data) {
+    $.getJSON(apiCall.stations).done(async function (data) {
             $.getJSON(data.features[0].id + "/observations/current").done(await function (obsv) {
                     callback(obsv);
                 });
