@@ -75,6 +75,10 @@ body {
     animation-timing-function: linear;
 }
 
+.weatherStation {
+    font-size: 0.9rem;
+}
+
 .condFont {
     font-size: 2rem;
 }
