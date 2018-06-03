@@ -62,7 +62,7 @@
                         <p class="footerText lastUpdated"></p>
                     </div>
                 </div>
-                <div class="d-flex flex-row">
+                <div class="d-flex align-items-center">
                     <div id="curCondTbl" class="condRow text-center table-responsive">
                     </div>
                 </div>
@@ -109,14 +109,21 @@
     <script>
         $(document).ready(async function () {
             await checkLocalWeatherData(async function (o) {
-                await getLastSavedWeatherData(async function (initdata) {
+                getLastSavedWeatherData(async function (initdata) {
                     console.log("Placing inital load data...");
-                    await placeData(initdata);
-                    if (o.timeSince < 1) {
-                        $(".lastUpdated").text("(Last updated: A few moments ago)");
+                    try {
+                        await placeData(initdata);
+                        if (o.timeSince < 1) {
+                            $(".lastUpdated").text("(Last updated: A few moments ago)");
+                        }
+                        else {
+                            $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                        }
                     }
-                    else {
-                        $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                    catch {
+                        console.log("Ignoring initial data due to local data mismatch.");
+                        console.log("Marking data as old.");
+                        o.old = true;
                     }
                     if (o.old == true) {
                         console.log("Data is either old or doesn't exist. Loading new data...");
