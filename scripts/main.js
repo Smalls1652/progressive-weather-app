@@ -357,11 +357,6 @@ async function placeData(wd) {
 
     $("#afdText").html(wd.nwsdata.afd.productText);
 
-    var hourlyHours = "";
-    var hourlyIcons = "";
-    var hourlyTemps = "";
-    var hourlyConditions = "";
-
     $("#weatherAlerts").html(null);
 
     if (wd.nwsdata.alerts.features) {
@@ -399,6 +394,12 @@ async function placeData(wd) {
         });
     }
 
+    var hourlyHours = "";
+    var hourlyIcons = "";
+    var hourlyTemps = "";
+    var hourlyPct = "";
+    var hourlyConditions = "";
+
     $.each(wd.nwsdata.hrs.slice(1, 13), async function (key, val) {
         var h = new Date(val.hour).getHours();
         var ampm = h >= 12 ? 'PM' : 'AM';
@@ -406,10 +407,13 @@ async function placeData(wd) {
         h = h % 12;
         h = h ? h : 12;
 
-        var regexIcons = (/^(?:(?<condition1>.*)\/(?<condition2>.*?)|(?<condition>.*))(?=\?size=.*)$/).exec(val.icon);
+        var regexURL = (/^https:\/\/api\.weather\.gov\/icons\/.*?\/(?:day|night)\/(.*?)$/).exec(val.icon);
+        console.log(regexURL);
+        var regexIcons = (/(?:(?<condition1>.*)\/(?<condition2>.*?)|(?<condition>.*))(?=\?size=.*)/).exec(regexURL[1]);
 
+        console.log(val.icon);
+        console.log(regexIcons);
         var pctChance;
-        var wxIcon;
 
         if (regexIcons.groups['condition1'] && regexIcons.groups['condition2']) {
             console.log("Two conditions");
@@ -427,7 +431,6 @@ async function placeData(wd) {
             else {
                 pct2 = 0;
             }
-            wxIcon = shortForecastIcon(regexIcons.groups['condition1'], true);
 
             if (pct1 && pct2) {
                 if (pct1 > pct2) {
@@ -445,24 +448,35 @@ async function placeData(wd) {
             }
         }
         else if (regexIcons.groups['condition']) {
+            console.log(regexIcons.groups['condition']);
             console.log("One condition");
-            wxIcon = shortForecastIcon(regexIcons.groups['condition'], true);
-            if ((/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition'])) {
-                pctChance = (/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition'])[1] + "%";
+            var ptc = regexIcons.groups['condition'];
+            console.log(ptc);
+            if ((/^(?:.*?,)(?<chance>.*)$/).test(ptc)) {
+                console.log("Chance found.");
+                pctChance = (/^(?:.*?,)(?<chance>.*)$/).exec(ptc)[1] + "%";
+
             }
+            else {
+                console.log("Chance not found.");
+                pctChance = "";
+            }
+
         }
         else {
-            pctChance = "0 %";
+            pctChance = "";
         }
 
 
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
         hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDayTime) + "\"></i></td>";
-        hourlyPct += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + pctChance + "</p></td>";
-        hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
+        hourlyPct += "<td class=\"hrHeader\"><span class=\"hourlyTemp\">" + pctChance + "</span></td>";
+        hourlyTemps += "<td class=\"hrHeader\"><span class=\"hourlyTemp\">" + val.temp + " &#8457;</span></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
 
-        var hourlyTable = `
+    });
+
+    var hourlyTable = `
         <table class="table table-borderless">
         <thead>
             <tr>
@@ -470,21 +484,19 @@ async function placeData(wd) {
             </tr>
         </thead>
         <tbody>
+        <tr>
+        ` + hourlyTemps + `
+    </tr>
             <tr>
                 ` + hourlyIcons + `
             </tr>
             <tr>
                 ` + hourlyPct + `
             </tr>
-            <tr>
-                ` + hourlyTemps + `
-            </tr>
         </tbody>
         </table>`;
 
-        $("#hourlyTbl").html(hourlyTable);
-
-    });
+    $("#hourlyTbl").html(hourlyTable);
 
     $(".forecastList").html(null);
 
