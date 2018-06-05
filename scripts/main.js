@@ -211,7 +211,7 @@ async function getWeatherStation(apiCall, callback) {
     $.getJSON(apiCall.stations, async function (data) {
         $.getJSON(data.features[0].id, await function (d1) {
             console.log(d1);
-            callback( d1.properties );
+            callback(d1.properties);
         });
     });
 
@@ -335,7 +335,7 @@ async function placeData(wd) {
     $(".currentCondition").text(wd.nwsdata.current.properties.textCondition);
     $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
     $(".currentTemp").html((Math.round(wd.nwsdata.current.properties.temperature.value * 1.8 + 32)) + " &#8457;");
-    
+
     var curCondTbl = `
     <table class="table table-sm table-borderless">
     <tbody>
@@ -406,12 +406,63 @@ async function placeData(wd) {
         h = h % 12;
         h = h ? h : 12;
 
+        var regexIcons = (/^(?:(?<condition1>.*)\/(?<condition2>.*?)|(?<condition>.*))(?=\?size=.*)$/).exec(val.icon);
+
+        var pctChance;
+        var wxIcon;
+
+        if (regexIcons.groups['condition1'] && regexIcons.groups['condition2']) {
+            console.log("Two conditions");
+            var pct1;
+            var pct2;
+            if ((/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition1'])) {
+                pct1 = (/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition1'])[1];
+            }
+            else {
+                pct1 = 0;
+            }
+            if ((/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition2'])) {
+                pct2 = (/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition2'])[1];
+            }
+            else {
+                pct2 = 0;
+            }
+            wxIcon = shortForecastIcon(regexIcons.groups['condition1'], true);
+
+            if (pct1 && pct2) {
+                if (pct1 > pct2) {
+                    pctChance = pct1 + "%";
+                }
+                else if (pct2 > pct1) {
+                    pctChance = pct2 + "%";
+                }
+            }
+            else if (pct1) {
+                pctChance = pct1 + "%";
+            }
+            else if (pct2) {
+                pctChance = pct2 + "%";
+            }
+        }
+        else if (regexIcons.groups['condition']) {
+            console.log("One condition");
+            wxIcon = shortForecastIcon(regexIcons.groups['condition'], true);
+            if ((/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition'])) {
+                pctChance = (/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition'])[1] + "%";
+            }
+        }
+        else {
+            pctChance = "0 %";
+        }
+
+
         hourlyHours += "<th scope=\"col\" class=\"hrHeader\">" + h + " " + ampm + "</th>";
         hourlyIcons += "<td class=\"hrHeader\"><i class=\"hourlyIcon wi " + shortForecastIcon(val.icon, val.isDayTime) + "\"></i></td>";
+        hourlyPct += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + pctChance + "</p></td>";
         hourlyTemps += "<td class=\"hrHeader\"><p class=\"hourlyTemp\">" + val.temp + " &#8457;</p></td>";
         hourlyConditions += "<td class=\"hrHeader\"><p>" + val.condition + "</p></td>";
-    });
-    var hourlyTable = `
+
+        var hourlyTable = `
         <table class="table table-borderless">
         <thead>
             <tr>
@@ -423,12 +474,17 @@ async function placeData(wd) {
                 ` + hourlyIcons + `
             </tr>
             <tr>
+                ` + hourlyPct + `
+            </tr>
+            <tr>
                 ` + hourlyTemps + `
             </tr>
         </tbody>
         </table>`;
 
-    $("#hourlyTbl").html(hourlyTable);
+        $("#hourlyTbl").html(hourlyTable);
+
+    });
 
     $(".forecastList").html(null);
 
