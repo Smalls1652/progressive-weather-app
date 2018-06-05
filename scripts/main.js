@@ -400,7 +400,7 @@ async function placeData(wd) {
     var hourlyPct = "";
     var hourlyConditions = "";
 
-    $.each(wd.nwsdata.hrs.slice(1, 13), async function (key, val) {
+    $.each(wd.nwsdata.hrs.slice(0, 12), async function (key, val) {
         var h = new Date(val.hour).getHours();
         var ampm = h >= 12 ? 'PM' : 'AM';
 
