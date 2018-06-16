@@ -1,8 +1,6 @@
-var geoLoc = {};
-
-var apiCalls = [];
-
 function shortForecastIcon(condition, daynight) {
+    //Converting the icon URL in the NWS data to the WeatherIcons font set.
+
     //console.log(condition);
 
     var t;
@@ -71,6 +69,7 @@ function shortForecastIcon(condition, daynight) {
 }
 
 function getCurrentLocation(callback) {
+    //Standard process of getting the device's current location through the browser.
 
     if (navigator.geolocation) {
         var lat_lng = navigator.geolocation.getCurrentPosition(function (position) {
@@ -79,115 +78,6 @@ function getCurrentLocation(callback) {
     } else {
         alert("Geolocation is not supported by this browser.");
     }
-}
-
-async function locationSuccess(callback) {
-
-    await getCurrentLocation(async function (point) {
-        var allWeatherData = {};
-
-        console.log("Coordinates saved.");
-        allWeatherData = {
-            "location": {
-                "latitude": point.coords.latitude,
-                "longitude": point.coords.longitude
-            }
-        };
-
-        console.log("Starting weather data gather...");
-
-        await getPointData(allWeatherData.location, async function (nwsbegin) {
-            allWeatherData.nwsdata = {
-                "afd": {},
-                "alerts": {},
-                "station": {},
-                "current": {},
-                "hrs": {},
-                "forecast": {},
-                "point": {}
-            };
-
-            allWeatherData.nwsdata.point = nwsbegin;
-
-            console.log("Grabbing point data from NWS...");
-            console.log(nwsbegin);
-            await getWeatherStation(nwsbegin, async function (wthrstatn) {
-                allWeatherData.nwsdata.station = wthrstatn;
-
-                await getCurrentWeather(nwsbegin, async function (curweather) {
-                    allWeatherData.nwsdata.current = curweather;
-
-                    await getAlertsData(nwsbegin, async function (alert) {
-                        console.log("Gathing alerts in the area from NWS...");
-                        allWeatherData.nwsdata.alerts = alert;
-
-                        await getAFDList(nwsbegin, async function (afd) {
-
-                            console.log("Getting the most recent AFD text from the local NWS office...");
-
-                            await getAFDText(afd['@graph'][0].id, async function (afdtext) {
-                                allWeatherData.nwsdata.afd = {
-                                    "issuedTime": afdtext.issuanceTime,
-                                    "productText": afdtext.productText.replace(/\\n/g, "<br />")
-                                };
-
-                                await getHourlyForecast(nwsbegin, async function (hrly) {
-                                    console.log("Getting current weather and hourly forecast data from NWS...");
-                                    var returnHourly = [];
-                                    $.each(hrly.properties.periods.slice(0, 13), async function (key, val) {
-                                        returnHourly.push({
-                                            "hour": val.startTime,
-                                            "temp": val.temperature,
-                                            "icon": val.icon,
-                                            "condition": val.shortForecast,
-                                            "isDayTime": val.isDaytime
-                                        });
-                                    });
-
-                                    allWeatherData.nwsdata.hrs = returnHourly;
-                                    await getNextFiveDays(nwsbegin, async function (weekataglance) {
-                                        console.log("Getting the next five days from NWS...");
-                                        var returnData = [];
-                                        $.each(weekataglance.properties.periods, async function (key, val) {
-                                            returnData.push({
-                                                "dayName": val.name,
-                                                "isDaytime": val.isDaytime,
-                                                "icon": val.icon,
-                                                "temp": val.temperature,
-                                                "detailedForecast": val.detailedForecast,
-                                                "shortForecast": val.shortForecast
-                                            });
-                                        });
-                                        allWeatherData.nwsdata.forecast = returnData;
-                                        await addWeatherData(allWeatherData);
-                                        callback(allWeatherData);
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            })
-        });
-    });
-
-    /*
-    console.log(allWeatherData.location);
-    dataGet(position);
-    var currentWeather = getCurrentWeather(allWeatherData.location);
-    console.log(currentWeather);
-    var forecastGet = getPointData(allWeatherData.location);
-    console.log(forecastGet);
-    var forecastObj = getNextFiveDays(forecastGet);
-    console.log(forecastObj);
-
-    */
-}
-
-function locationError() {
-
-    alert("Location request failure. Please try again.");
-    console.log("Location request failure.");
 }
 
 async function getPointData(point, callback) {
@@ -218,9 +108,10 @@ async function getWeatherStation(apiCall, callback) {
 }
 
 async function getCurrentWeather(apiCall, callback) {
+    //Gathering current weather data for the location
 
     $.getJSON(apiCall.stations, async function (data) {
-        $.getJSON(data.features[0].id + "/observations/current", await function (d2) {
+        $.getJSON(data.features[0].id + "/observations/current", function (d2) {
             callback(d2);
         });
     });
@@ -228,6 +119,7 @@ async function getCurrentWeather(apiCall, callback) {
 }
 
 async function getAFDList(apiCall, callback) {
+    //Gathering the Area Forecast Discussion (AFD) product list from the location's NWS Office.
 
     console.log(apiCall.office);
     $.getJSON("https://api.weather.gov/products/types/AFD/locations/" + apiCall.office, await function (data) {
@@ -239,7 +131,7 @@ async function getAFDList(apiCall, callback) {
 }
 
 async function getAlertsData(apiCall, callback) {
-
+    //Gathering weather alerts for the location
     $.getJSON(apiCall.county, async function (data) {
 
         $.getJSON("https://api.weather.gov/alerts/active/zone/" + data.properties.id, await function (aldt) {
@@ -251,6 +143,7 @@ async function getAlertsData(apiCall, callback) {
 }
 
 async function getAFDText(apiCall, callback) {
+    //Gathering data for the Area Forecast Discussion (AFD) product text for a particular issuance time.
 
     $.getJSON("https://api.weather.gov/products/" + apiCall, await function (data) {
 
@@ -261,6 +154,7 @@ async function getAFDText(apiCall, callback) {
 }
 
 async function getHourlyForecast(apiCall, callback) {
+    //Gathering hourly forecast data for the location.
 
     $.getJSON(apiCall.hrfore, await function (data) {
 
@@ -271,6 +165,7 @@ async function getHourlyForecast(apiCall, callback) {
 }
 
 async function getNextFiveDays(apiCall, callback) {
+    //Gathering the weekly forecast for the next five days.
 
     $.getJSON(apiCall.forecast, await function (data) {
 
@@ -280,87 +175,101 @@ async function getNextFiveDays(apiCall, callback) {
 
 }
 
-async function addWeatherData(weatherData) {
+async function addWeatherData(isCurrentLocation, weatherData) {
+    //Adding the gathered data to the locally stored database
+
     console.log("Adding weather data to DB...");
-    await localforage.setItem(new Date().getTime().toString(), {
+
+    var locationName;
+
+    if (isCurrentLocation) {
+        locationName = "Current Location";
+    }
+    else {
+        locationName = weatherData.nwsdata.point.properties.relativeLocation.city + ", " + weatherData.nwsdata.point.properties.relativeLocation.state;
+    }
+
+    await localforage.setItem(locationName, {
+        "updateTime": new Date().getTime().toString(),
         "location": weatherData.location,
         "nwsdata": weatherData.nwsdata
-    }).then(async function (value) {
+    }).then(function (value) {
         console.log(value);
-    }).catch(async function (err) {
+    }).catch(function (err) {
         console.log(err);
     });
 }
 
-async function checkLocalWeatherData(callback) {
-    await localforage.length().then(async function (numofkeys) {
-        await localforage.key(numofkeys - 1).then(async function (keyname) {
-            console.log(keyname);
+async function checkLocalWeatherData(selectedLocation, callback) {
+    //Checking to see if the data requested from the local database is outside of the 30 minute range. 
 
-            var compareTime = new Date().getTime() - keyname;
+    await localforage.getItem(selectedLocation).then(function (keydata) {
+        console.log(keydata);
 
-            console.log(compareTime);
-            var timeSince = compareTime / 60000;
+        var compareTime = new Date().getTime() - keydata.updateTime;
 
-            console.log(timeSince);
-            if (timeSince <= 30) {
-                callback({
-                    "old": false,
-                    "timeSince": timeSince
-                });
-            } else {
-                callback({
-                    "old": true,
-                });
-            }
-        });
-    });
-}
+        console.log(compareTime);
+        var timeSince = compareTime / 60000;
 
-async function getLastSavedWeatherData(callback) {
-    await localforage.length().then(async function (numofkeys) {
-        await localforage.key(numofkeys - 1).then(async function (keyname) {
-            localforage.getItem(keyname).then(await function (value) {
-                callback(value);
+        console.log(timeSince);
+        if (timeSince <= 30) {
+            callback({
+                "old": false,
+                "timeSince": timeSince,
+                "data": keydata
             });
-        });
+        } else {
+            callback({
+                "old": true,
+                "data": keydata
+            });
+        }
     });
-
 }
 
-async function placeData(wd) {
+async function getDefaultLocation(callback) {
+    //Getting the default location's data.
+    await localforage.getItem("Current Location").then(function (locData) {
+    callback(locData); //The Current Location is the default location for the time being. This will change.
+    });
+}
 
-    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(wd.nwsdata.current.properties.icon, true) + "\"></i>");
-    $(".weatherStation").text("From " + ((wd.nwsdata.station.name).split(", ")[1]) + " [" + wd.nwsdata.station.stationIdentifier + "]");
-    $(".currentCondition").text(wd.nwsdata.current.properties.textCondition);
-    $("#WhereAmI").text(wd.nwsdata.point.properties.relativeLocation.properties.city + ", " + wd.nwsdata.point.properties.relativeLocation.properties.state);
-    $(".currentTemp").html((Math.round(wd.nwsdata.current.properties.temperature.value * 1.8 + 32)) + " &#8457;");
+function placeCurrentWeather(d) {
+    $("#weatherIcon").html("<i class=\"currentConditionIcon current-cond-icon wi " + shortForecastIcon(d.nwsdata.current.properties.icon, true) + "\"></i>");
+    $(".weatherStation").text("From " + ((d.nwsdata.station.name).split(", ")[1]) + " [" + d.nwsdata.station.stationIdentifier + "]");
+    $(".currentCondition").text(d.nwsdata.current.properties.textCondition);
+    $("#WhereAmI").text(d.nwsdata.point.properties.relativeLocation.properties.city + ", " + d.nwsdata.point.properties.relativeLocation.properties.state);
+    $(".currentTemp").html((Math.round(d.nwsdata.current.properties.temperature.value * 1.8 + 32)) + " &#8457;");
 
     var curCondTbl = `
     <table class="table table-sm table-borderless">
     <tbody>
         <tr>
         <th scope="row" class="text-left">Wind</th>
-        <td class="text-left">` + Math.round(wd.nwsdata.current.properties.windSpeed.value) + ` MPH</td>
+        <td class="text-left">` + Math.round(d.nwsdata.current.properties.windSpeed.value) + ` MPH</td>
         </tr>
         <tr>
         <th scope="row" class="text-left">Humidity</th>
-        <td class="text-left">` + Math.round(wd.nwsdata.current.properties.relativeHumidity.value) + `%</td>
+        <td class="text-left">` + Math.round(d.nwsdata.current.properties.relativeHumidity.value) + `%</td>
         </tr>
         <th scope="row" class="text-left">Pressure</th>
-        <td class="text-left">` + Math.round((wd.nwsdata.current.properties.barometricPressure.value * 0.01)) + ` mb (` + Math.round((wd.nwsdata.current.properties.barometricPressure.value * 0.00029529983071)) + ` in)</td>
+        <td class="text-left">` + Math.round((d.nwsdata.current.properties.barometricPressure.value * 0.01)) + ` mb (` + Math.round((d.nwsdata.current.properties.barometricPressure.value * 0.00029529983071)) + ` in)</td>
         </tr>
         </tbody>
     </table>`;
 
     $("#curCondTbl").html(curCondTbl);
+}
 
-    $("#afdText").html(wd.nwsdata.afd.productText);
+function placeAFD(d) {
+    $("#afdText").html(d.nwsdata.afd.productText);
+}
 
+function placeWeatherAlerts(d) {
     $("#weatherAlerts").html(null);
 
-    if (wd.nwsdata.alerts.features) {
-        $.each(wd.nwsdata.alerts.features, async function (key, val) {
+    if (d.nwsdata.alerts.features) {
+        $.each(d.nwsdata.alerts.features, async function (key, val) {
             console.log("Placing alert" + val.properties.headline);
             var alertLevel;
             if (val.properties.severity == "Minor") {
@@ -393,14 +302,16 @@ async function placeData(wd) {
 
         });
     }
+}
 
+function placeHourlyForecast(d) {
     var hourlyHours = "";
     var hourlyIcons = "";
     var hourlyTemps = "";
     var hourlyPct = "";
     var hourlyConditions = "";
 
-    $.each(wd.nwsdata.hrs.slice(0, 12), async function (key, val) {
+    $.each(d.nwsdata.hrs.slice(0, 12), async function (key, val) {
         var h = new Date(val.hour).getHours();
         var ampm = h >= 12 ? 'PM' : 'AM';
 
@@ -408,15 +319,15 @@ async function placeData(wd) {
         h = h ? h : 12;
 
         var regexURL = (/^https:\/\/api\.weather\.gov\/icons\/.*?\/(?:day|night)\/(.*?)$/).exec(val.icon);
-        console.log(regexURL);
+        //console.log(regexURL);
         var regexIcons = (/(?:(?<condition1>.*)\/(?<condition2>.*?)|(?<condition>.*))(?=\?size=.*)/).exec(regexURL[1]);
 
-        console.log(val.icon);
-        console.log(regexIcons);
+        //console.log(val.icon);
+        //console.log(regexIcons);
         var pctChance;
 
         if (regexIcons.groups['condition1'] && regexIcons.groups['condition2']) {
-            console.log("Two conditions");
+            //console.log("Two conditions");
             var pct1;
             var pct2;
             if ((/^(?:.*?,)(?<chance>.*)$/).exec(regexIcons.groups['condition1'])) {
@@ -448,17 +359,17 @@ async function placeData(wd) {
             }
         }
         else if (regexIcons.groups['condition']) {
-            console.log(regexIcons.groups['condition']);
-            console.log("One condition");
+            //console.log(regexIcons.groups['condition']);
+            //console.log("One condition");
             var ptc = regexIcons.groups['condition'];
-            console.log(ptc);
+            //console.log(ptc);
             if ((/^(?:.*?,)(?<chance>.*)$/).test(ptc)) {
-                console.log("Chance found.");
+                //console.log("Chance found.");
                 pctChance = (/^(?:.*?,)(?<chance>.*)$/).exec(ptc)[1] + "%";
 
             }
             else {
-                console.log("Chance not found.");
+                //console.log("Chance not found.");
                 pctChance = "";
             }
 
@@ -497,10 +408,13 @@ async function placeData(wd) {
         </table>`;
 
     $("#hourlyTbl").html(hourlyTable);
+}
+
+function placeWeeklyForecast(d) {
 
     $(".forecastList").html(null);
 
-    $.each(wd.nwsdata.forecast, async function (key, val) {
+    $.each(d.nwsdata.forecast, async function (key, val) {
         var dName = val.dayName;
         var dateName = val.dayName.replace(/\s/g, '');
 
@@ -576,21 +490,24 @@ async function placeData(wd) {
     });
 }
 
-function startupScript() {
-
-    getCurrentLocation();
-
+function placeData(wd) {
+    //Placing data to their respective elements.
+    placeCurrentWeather(wd);
+    placeAFD(wd);
+    placeWeatherAlerts(wd);
+    placeHourlyForecast(wd);
+    placeWeeklyForecast(wd);
 }
 
 async function runFreshUpdate() {
 
     console.log("Hard refresh iniated by user...");
     //$("#refreshButton").addClass("nowRefresh");
-    await locationSuccess(async function (awd) {
+    await runWeatherData("", true, async function (awd) {
         console.log("Checking the DB for new data...");
-        await getLastSavedWeatherData(async function (data) {
+        await checkLocalWeatherData("Current Location", async function (o) {
             console.log("Placing data...");
-            await placeData(data);
+            await placeData(o.data);
             $(".lastUpdated").text("(Last updated: Just Now)");
             console.log("Done.")
         });
@@ -598,6 +515,98 @@ async function runFreshUpdate() {
     //$("#refreshButton").removeClass("nowRefresh");
 }
 
-function dataGet(location) {
-    console.log(location);
+async function runWeatherData(selectedLocation, isCurrentLocation, callback) {
+    var gatheredData = {};
+    if (isCurrentLocation) {
+        await getCurrentLocation(async function (point) {
+            gatheredData = {
+                "location": {
+                    "latitude": point.coords.latitude,
+                    "longitude": point.coords.longitude
+                }
+            };
+            await gatherWeatherData(gatheredData.location, async function (z) {
+                gatheredData.nwsdata = {
+                    "afd": z.afd,
+                    "alerts": z.alerts,
+                    "station": z.station,
+                    "current": z.current,
+                    "hrs": z.hrs,
+                    "forecast": z.forecast,
+                    "point": z.point
+                };
+                console.log("Finalized.")
+                await addWeatherData(true, gatheredData);
+            });
+        });
+    }
 }
+
+async function gatherWeatherData(location, callback) {
+    var dd = {};
+    console.log("Grabbing point data from NWS...");
+    await getPointData(location, async function (nwsPoint) {
+        console.log(nwsPoint);
+        dd.point = nwsPoint;
+
+        await getWeatherStation(nwsPoint, async function (nwsWthrStn) {
+            dd.station = nwsWthrStn;
+
+            await getCurrentWeather(nwsPoint, async function (nwsCurWeather) {
+                dd.current = nwsCurWeather;
+
+                await getAlertsData(nwsPoint, async function (nwsAlerts) {
+                    console.log("Gathing alerts in the area from NWS...");
+                    dd.alerts = nwsAlerts;
+
+                    await getAFDList(nwsPoint, async function (nwsAFDList) {
+                        console.log("Getting the most recent AFD text from the local NWS office...");
+                        await getAFDText(nwsAFDList['@graph'][0].id, async function (nwsAFDText) {
+                            dd.afd = {
+                                "issuedTime": nwsAFDText.issuanceTime,
+                                "productText": nwsAFDText.productText.replace(/\\n/g, "<br />")
+                            };
+
+                            await getHourlyForecast(nwsPoint, async function (nwsHrly) {
+                                console.log("Getting current weather and hourly forecast data from NWS...");
+
+                                var returnHourly = [];
+
+                                $.each(nwsHrly.properties.periods.slice(0, 13), function (key, val) {
+                                    returnHourly.push({
+                                        "hour": val.startTime,
+                                        "temp": val.temperature,
+                                        "icon": val.icon,
+                                        "condition": val.shortForecast,
+                                        "isDayTime": val.isDaytime
+                                    });
+                                });
+
+                                dd.hrs = returnHourly;
+
+                                await getNextFiveDays(nwsPoint, async function (nwsWeek) {
+                                    console.log("Getting the next five days from NWS...");
+                                    var returnData = [];
+                                    $.each(nwsWeek.properties.periods, function (key, val) {
+                                        returnData.push({
+                                            "dayName": val.name,
+                                            "isDaytime": val.isDaytime,
+                                            "icon": val.icon,
+                                            "temp": val.temperature,
+                                            "detailedForecast": val.detailedForecast,
+                                            "shortForecast": val.shortForecast
+                                        });
+                                    });
+                                    dd.forecast = returnData;
+
+                                    callback(dd);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
