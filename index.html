@@ -108,11 +108,10 @@
 
     <script>
         $(document).ready(async function () {
-            await checkLocalWeatherData(async function (o) {
-                getLastSavedWeatherData(async function (initdata) {
+            await checkLocalWeatherData("Current Location", async function (o) {
                     console.log("Placing inital load data...");
                     try {
-                        await placeData(initdata);
+                        await placeData(o.data);
                         if (o.timeSince < 1) {
                             $(".lastUpdated").text("(Last updated: A few moments ago)");
                         }
@@ -127,11 +126,11 @@
                     }
                     if (o.old == true) {
                         console.log("Data is either old or doesn't exist. Loading new data...");
-                        await locationSuccess(async function (awd) {
+                        await runWeatherData("", true, async function (awd) {
                             console.log("Checking the DB for new data...");
-                            await getLastSavedWeatherData(async function (data) {
+                            await checkLocalWeatherData("Current Location", async function (o) {
                                 console.log("Placing data...");
-                                await placeData(data);
+                                await placeData(o.data);
                                 $(".lastUpdated").text("(Last updated: Just Now)");
                             });
                             console.log("Done.")
@@ -139,9 +138,9 @@
                     }
                     else {
                         console.log("Checking the DB for last good data...");
-                        await getLastSavedWeatherData(async function (data) {
+                        await checkLocalWeatherData("Current Location", async function (o) {
                             console.log("Placing data...");
-                            await placeData(data);
+                            await placeData(o.data);
                             if (o.timeSince < 1) {
                                 $(".lastUpdated").text("(Last updated: A few moments ago)");
                             }
@@ -153,7 +152,6 @@
                     }
                 });
             });
-        });
 
         if ($(window).width() < 1365) {
             $("#afdCard").removeClass("show");
