@@ -108,38 +108,15 @@
 
     <script>
         $(document).ready(async function () {
-            await checkLocalWeatherData("Current Location", async function (o) {
-                    console.log("Placing inital load data...");
-                    try {
-                        await placeData(o.data);
-                        if (o.timeSince < 1) {
-                            $(".lastUpdated").text("(Last updated: A few moments ago)");
-                        }
-                        else {
-                            $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
-                        }
-                    }
-                    catch {
-                        console.log("Ignoring initial data due to local data mismatch.");
-                        console.log("Marking data as old.");
-                        o.old = true;
-                    }
-                    if (o.old == true) {
-                        console.log("Data is either old or doesn't exist. Loading new data...");
-                        await runWeatherData("", true, async function (awd) {
-                            console.log("Checking the DB for new data...");
-                            await checkLocalWeatherData("Current Location", async function (o) {
-                                console.log("Placing data...");
-                                await placeData(o.data);
-                                $(".lastUpdated").text("(Last updated: Just Now)");
-                            });
-                            console.log("Done.")
-                        });
-                    }
-                    else {
-                        console.log("Checking the DB for last good data...");
-                        await checkLocalWeatherData("Current Location", async function (o) {
-                            console.log("Placing data...");
+
+            var dbVer = "0.2";
+
+            await checkDBVersion(dbVer, async function (dbCheckStatus) {
+
+                if (dbCheckStatus) {
+                    await checkLocalWeatherData("Current Location", async function (o) {
+                        console.log("Placing inital load data...");
+                        try {
                             await placeData(o.data);
                             if (o.timeSince < 1) {
                                 $(".lastUpdated").text("(Last updated: A few moments ago)");
@@ -147,11 +124,38 @@
                             else {
                                 $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
                             }
-                            console.log("Done.")
-                        });
-                    }
-                });
+                        }
+                        catch {
+                            console.log("Ignoring initial data due to local data mismatch.");
+                            console.log("Marking data as old.");
+                            o.old = true;
+                        }
+                        if (o.old == true || o == "error") {
+                            console.log("Data is either old or doesn't exist. Loading new data...");
+                            await runWeatherData("", true, async function (awd) {
+                                await placeData(awd);
+                                $(".lastUpdated").text("(Last updated: Just Now)");
+                                console.log("Done.")
+                            });
+                        }
+                        else {
+                            console.log("Checking the DB for last good data...");
+                            await checkLocalWeatherData("Current Location", async function (ooo) {
+                                console.log("Placing data...");
+                                await placeData(ooo.data);
+                                if (ooo.timeSince < 1) {
+                                    $(".lastUpdated").text("(Last updated: A few moments ago)");
+                                }
+                                else {
+                                    $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                                }
+                                console.log("Done.")
+                            });
+                        }
+                    });
+                }
             });
+        });
 
         if ($(window).width() < 1365) {
             $("#afdCard").removeClass("show");
