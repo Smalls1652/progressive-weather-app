@@ -21,6 +21,7 @@ var urlsToCache = [
  "/scripts",
  "/scripts/app.js",
  "/scripts/main.js",
+ "/scripts/search.js",
  "/scripts/localforage.js",
  "/style",
  "/style/weather-icons.css",
