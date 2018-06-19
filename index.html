@@ -37,16 +37,30 @@
 
 <body>
     <nav class="navbar fixed-top navbar-dark bg-dark devicespecific">
-        <a class="navbar-brand" href="#">
-            <img src="/images/icons/icon.svg" width="40" height="40" class="d-inline-block align-middle">
-            <span id="WhereAmI" class="pl-2"></span>
-        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <ul class="navbar-nav text-white">
+            <li class="navbar-brand active" id="WhereAmI">
+            </li>
+        </ul>
         <form class="form-inline">
             <a class="btn btn-info" href="#" role="button" onclick="runFreshUpdate();">
                 <i class="refreshIcon wi wi-refresh"></i>
             </a>
         </form>
     </nav>
+    <div class="collapse fixed-top devicespecific" id="navbarToggleExternalContent">
+        <div class="bg-dark p-4">
+            <button type="button" class="close text-white" aria-label="Close" data-toggle="collapse" data-target="#navbarToggleExternalContent"
+                aria-controls="navbarToggleExternalContent" aria-expanded="false">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <h5 class="text-white h4">Locations</h5>
+            <span class="text-muted">Current Location</span>
+        </div>
+    </div>
     <div class="container-fluid">
         <div class="row">
             <div class="col">
@@ -104,6 +118,7 @@
 
     <!-- Progressive Weather App -->
     <script type="text/javascript" src="/scripts/main.js"></script>
+    <script type="text/javascript" src="/scripts/search.js"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
 
     <script>
