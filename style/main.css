@@ -19,7 +19,7 @@ body {
         padding-top: calc(env(safe-area-inset-top) + 5px);
     }
     #navbarToggleExternalContent {
-        margin-top: calc(env(safe-area-inset-top) + 90px);
+        margin-top: calc(env(safe-area-inset-top) + 60px);
     }
 }
 
