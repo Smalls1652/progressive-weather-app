@@ -43,7 +43,7 @@ function parseSearchResults(q) {
             }
         };
 
-        $("#searchList").append("<button class=\"btn mt-1\" onclick=\"setLocationName(" + key + ")\">" + val.display_name + "</button>")
+        $("#searchList").append("<button class=\"btn btn-light mt-1\" onclick=\"setLocationName(" + key + ")\">" + val.display_name + "</button>")
     });
 
     localforage.setItem("Location Search Results", searchList);
