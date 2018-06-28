@@ -173,6 +173,10 @@ table {
     table-layout: auto;
 }
 
+#navbarToggleExternalContent {
+    margin-top: 65px;
+}
+
 @keyframes spin {
     from {
         transform: rotate(0deg);

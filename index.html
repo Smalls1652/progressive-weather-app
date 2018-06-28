@@ -57,8 +57,19 @@
                 aria-controls="navbarToggleExternalContent" aria-expanded="false">
                 <span aria-hidden="true">&times;</span>
             </button>
-            <h5 class="text-white h4">Locations</h5>
-            <span class="text-muted">Current Location</span>
+            <h5 class="text-white h4">
+                <button class="btn btn-info" type="button" onclick="menuChange('locationsList');">Locations</button>
+                <button class="btn btn-info" type="button" onclick="menuChange('addLocation');">(+)</a>
+            </h5>
+            <div id="locationsList" class="collapse show">
+                <span class="text-muted">Current Location</span>
+            </div>
+            <div id="addLocation" class="collapse">
+                <form>
+                    <input type="search" class="form-control" id="searchBox" oninput="getSearchResults(this.value);">
+                </form>
+                <div id="searchList" class="text-white"></div>
+            </div>
         </div>
     </div>
     <div class="container-fluid">

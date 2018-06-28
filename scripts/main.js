@@ -27,6 +27,32 @@ async function runWeatherData(selectedLocation, isCurrentLocation, callback) {
             });
         });
     }
+    else {
+        await localforage.getItem(selectedLocation).then(async function (dbData) {
+
+            gatheredData = {
+                "location": {
+                    "latitude": dbData.location.latitude,
+                    "longitude": dbData.location.longitude
+                }
+            };
+
+            await gatherWeatherData(gatheredData.location, async function (z) {
+                gatheredData.nwsdata = {
+                    "afd": z.afd,
+                    "alerts": z.alerts,
+                    "station": z.station,
+                    "current": z.current,
+                    "hrs": z.hrs,
+                    "forecast": z.forecast,
+                    "point": z.point
+                };
+                console.log("Finalized.")
+                await addWeatherData(false, gatheredData, selectedLocation);
+                callback(gatheredData);
+            });
+        });
+    }
 }
 
 async function gatherWeatherData(location, callback) {
@@ -509,7 +535,7 @@ async function checkLocalWeatherData(selectedLocation, callback) {
     });
 }
 
-async function addWeatherData(isCurrentLocation, weatherData) {
+async function addWeatherData(isCurrentLocation, weatherData, x) {
     //Adding the gathered data to the locally stored database
 
     console.log("Adding weather data to DB...");
@@ -520,7 +546,7 @@ async function addWeatherData(isCurrentLocation, weatherData) {
         locationName = "Current Location";
     }
     else {
-        locationName = weatherData.nwsdata.point.properties.relativeLocation.city + ", " + weatherData.nwsdata.point.properties.relativeLocation.state;
+        locationName = x;
     }
 
     await localforage.setItem(locationName, {
@@ -631,5 +657,16 @@ function getCurrentLocation(callback) {
         });
     } else {
         alert("Geolocation is not supported by this browser.");
+    }
+}
+
+function menuChange(menuItem) {
+    if (menuItem == "locationsList") {
+        $("#locationsList").collapse("show");
+        $("#addLocation").collapse("hide");
+    }
+    else if (menuItem == "addLocation") {
+        $("#locationsList").collapse("hide");
+        $("#addLocation").collapse("show");
     }
 }

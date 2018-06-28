@@ -1,11 +1,11 @@
-function getSearchResults() {
+function getSearchResults(searchQuery) {
 
-    var searchQuery = document.getElementById("searchBox").value;
+    //var searchQuery = document.getElementById("searchBox").value;
 
     if (/(?<city>(.*),(.*))/i.test(searchQuery)) {
 
-       var parsedCity = /(?<full>(?<city>.*),(?<state>.*))/i.exec(searchQuery);
-        
+        var parsedCity = /(?<full>(?<city>.*),(?<state>.*))/i.exec(searchQuery);
+
         var apiCall = "https://nominatim.openstreetmap.org/search?format=jsonv2&namedetails=1&city=" + encodeURIComponent(parsedCity.groups.city) + "&state=" + encodeURIComponent(parsedCity.groups.state) + "&countrycodes=US";
 
         $.getJSON(apiCall).done(function (data) {
@@ -32,15 +32,18 @@ function getSearchResults() {
 }
 
 function parseSearchResults(q) {
-    $("#list").html("");
+    $("#searchList").html("");
     var searchList = {};
     $.each(q, function (key, val) {
         searchList[key] = {
-            "location": val.display_name,
-            "coord": val.lat + ", " + val.lon
+            "name": val.display_name,
+            "location": {
+                "latitude": val.lat,
+                "longitude": val.lon
+            }
         };
 
-        $("#list").append("<div onclick=\"setLocationName(" + key + ")\">" + val.display_name + "</div>")
+        $("#searchList").append("<div onclick=\"setLocationName(" + key + ")\">" + val.display_name + "</div>")
     });
 
     localforage.setItem("Location Search Results", searchList);
@@ -52,11 +55,13 @@ function setLocationName(s) {
         var askedName = prompt("Set friendly name:");
 
         var finalData = {
-            "location": askedName,
-            "coord": dbData[s].coord
+            "location": dbData[s].location
         };
-        console.log(finalData);
-        localforage.removeItem("Location Search Results");
+        localforage.setItem(askedName, finalData).then(function () {
+            localforage.removeItem("Location Search Results").then(
+                runWeatherData(askedName, false, function () {})
+            );
+        });
 
     });
 }
