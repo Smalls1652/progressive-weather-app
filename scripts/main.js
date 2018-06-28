@@ -691,7 +691,7 @@ function updateLocationsList() {
     locationsStore.keys().then(function (kList) {
         var locationList = "";
         $.each(kList, function (key, val) {
-            locationList += `<li class="list-group-item p-2" onclick="selectLocationData('` + val + `');">` + val + `</li>`;
+            locationList += `<button class="btn mb-2" onclick="selectLocationData('` + val + `');">` + val + `</button>`;
         });
 
         console.log(locationList);
