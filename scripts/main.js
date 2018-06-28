@@ -677,8 +677,8 @@ function menuChange(menuItem) {
         $("#addLocation").collapse("hide");
     }
     else if (menuItem == "addLocation") {
-        $("#locationsList").collapse("hide");
-        $("#addLocation").collapse("show");
+        $("#locationsList").collapse("toggle");
+        $("#addLocation").collapse("toggle");
     }
 }
 
