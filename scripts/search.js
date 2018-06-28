@@ -58,9 +58,18 @@ function setLocationName(s) {
             "location": dbData[s].location
         };
         localforage.setItem(askedName, finalData).then(function () {
-            localforage.removeItem("Location Search Results").then(
-                runWeatherData(askedName, false, function () {})
-            );
+            localforage.removeItem("Location Search Results").then(function () {
+                var locationsStore = localforage.createInstance({
+                    name: "pwaWeather",
+                    storeName: "locationsStore"
+                });
+
+                locationsStore.setItem(askedName, null).then(function () {
+                    runWeatherData(askedName, false, function () {
+                        menuChange("locationsList")
+                    })
+                });
+            });
         });
 
     });

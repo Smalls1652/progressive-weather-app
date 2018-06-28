@@ -491,16 +491,24 @@ function placeData(wd) {
 async function runFreshUpdate() {
     //For when then user initiates a hard refresh.
 
-    console.log("Hard refresh initiated by user...");
-    //$("#refreshButton").addClass("nowRefresh");
-    await runWeatherData("", true, async function (awd) {
-        console.log("Checking the DB for new data...");
-        console.log("Placing data...");
-        await placeData(awd);
-        $(".lastUpdated").text("(Last updated: Just Now)");
-        console.log("Done.")
+    var settingsStore = localforage.createInstance({
+        name: "pwaWeather",
+        storeName: "settingsStore"
     });
-    //$("#refreshButton").removeClass("nowRefresh");
+
+    settingsStore.getItem("selectedLocation").then(async function (y) {
+
+        console.log("Hard refresh initiated by user...");
+        //$("#refreshButton").addClass("nowRefresh");
+        await runWeatherData(y.name, y.currentLocation, async function (awd) {
+            console.log("Checking the DB for new data...");
+            console.log("Placing data...");
+            await placeData(awd);
+            $(".lastUpdated").text("(Last updated: Just Now)");
+            console.log("Done.")
+        });
+        //$("#refreshButton").removeClass("nowRefresh");
+    });
 }
 
 async function checkLocalWeatherData(selectedLocation, callback) {
@@ -560,15 +568,18 @@ async function addWeatherData(isCurrentLocation, weatherData, x) {
     });
 }
 
-function checkDBVersion(ver, callback) {
+function checkDBVersion(ver, sStore, callback) {
     //For when the dbVer changes. In this particular instance, there was a database wipe.
 
-    localforage.getItem("dbVersion").then(async function (i) {
+    sStore.getItem("dbVersion").then(async function (i) {
         if (i != ver) {
             console.log("DB is outdated.");
             await localforage.clear();
-            localforage.setItem("dbVersion", ver);
+            sStore.setItem("dbVersion", ver);
             console.log("DB has been updated to version " + ver + ".");
+        }
+        else {
+            console.log("DB version is " + i + ". Good to go.")
         }
         callback(true);
     });
@@ -669,4 +680,86 @@ function menuChange(menuItem) {
         $("#locationsList").collapse("hide");
         $("#addLocation").collapse("show");
     }
+}
+
+function updateLocationsList() {
+    var locationsStore = localforage.createInstance({
+        name: "pwaWeather",
+        storeName: "locationsStore"
+    });
+
+    locationsStore.keys().then(function (kList) {
+        var locationList = "";
+        $.each(kList, function (key, val) {
+            locationList += `<li class="list-group-item p-2" onclick="selectLocationData('` + val + `');">` + val + `</li>`;
+        });
+
+        console.log(locationList);
+        $("#userList").html(locationList);
+    })
+}
+
+async function selectLocationData(od, isCurrentLocation) {
+    console.log(od);
+    await checkLocalWeatherData(od, async function (o) {
+        console.log("Placing inital load data...");
+        try {
+            await placeData(o.data);
+            if (o.timeSince < 1) {
+                $(".lastUpdated").text("(Last updated: A few moments ago)");
+            }
+            else {
+                $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+            }
+        }
+        catch {
+            console.log("Ignoring initial data due to local data mismatch.");
+            console.log("Marking data as old.");
+            o.old = true;
+        }
+        if (o.old == true || o == "error") {
+            console.log("Data is either old or doesn't exist. Loading new data...");
+            await runWeatherData(od, isCurrentLocation, async function (awd) {
+                await placeData(awd);
+                $(".lastUpdated").text("(Last updated: Just Now)");
+                console.log("Done.")
+            });
+        }
+        else {
+            console.log("Checking the DB for last good data...");
+            await checkLocalWeatherData(od, async function (ooo) {
+                console.log("Placing data...");
+                await placeData(ooo.data);
+                if (ooo.timeSince < 1) {
+                    $(".lastUpdated").text("(Last updated: A few moments ago)");
+                }
+                else {
+                    $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
+                }
+                console.log("Done.")
+            });
+        }
+
+        var settingsStore = localforage.createInstance({
+            name: "pwaWeather",
+            storeName: "settingsStore"
+        });
+
+        if (isCurrentLocation) {
+            settingsStore.setItem("selectedLocation", {
+                "name": "Current Location",
+                "currentLocation": true
+            });
+        }
+        else {
+            settingsStore.setItem("selectedLocation", {
+                "name": od,
+                "currentLocation": false
+            });
+        }
+
+        $("#navbarToggleExternalContent").collapse("hide");
+    });
+
+
 }

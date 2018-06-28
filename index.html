@@ -53,22 +53,26 @@
     </nav>
     <div class="collapse fixed-top devicespecific" id="navbarToggleExternalContent">
         <div class="bg-dark p-4">
-            <button type="button" class="close text-white" aria-label="Close" data-toggle="collapse" data-target="#navbarToggleExternalContent"
-                aria-controls="navbarToggleExternalContent" aria-expanded="false">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <h5 class="text-white h4">
+            <div class="container-fluid pb-3">
                 <button class="btn btn-info" type="button" onclick="menuChange('locationsList');">Locations</button>
                 <button class="btn btn-info" type="button" onclick="menuChange('addLocation');">(+)</a>
-            </h5>
+
+            </div>
             <div id="locationsList" class="collapse show">
-                <span class="text-muted">Current Location</span>
+                <div class="container-fluid">
+                    <ul class="list-group">
+                        <li class="list-group-item p-2" onclick="selectLocationData('Current Location', true);">Current Location</li>
+                        <div id="userList"></div>
+                    </ul>
+                </div>
             </div>
             <div id="addLocation" class="collapse">
+                    <div class="container-fluid">
                 <form>
-                    <input type="search" class="form-control" id="searchBox" oninput="getSearchResults(this.value);">
+                    <input type="search" placeholder="Enter city name or zip-code..." class="form-control" id="searchBox" oninput="getSearchResults(this.value);">
                 </form>
                 <div id="searchList" class="text-white"></div>
+            </div>
             </div>
         </div>
     </div>
@@ -135,50 +139,25 @@
     <script>
         $(document).ready(async function () {
 
-            var dbVer = "0.2";
+            localforage.config({
+                name: "pwaWeather",
+                storeName: "WeatherDataStore"
+            });
 
-            await checkDBVersion(dbVer, async function (dbCheckStatus) {
+            var locationsStore = localforage.createInstance({
+                name: "pwaWeather",
+                storeName: "locationsStore"
+            });
 
-                if (dbCheckStatus) {
-                    await checkLocalWeatherData("Current Location", async function (o) {
-                        console.log("Placing inital load data...");
-                        try {
-                            await placeData(o.data);
-                            if (o.timeSince < 1) {
-                                $(".lastUpdated").text("(Last updated: A few moments ago)");
-                            }
-                            else {
-                                $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
-                            }
-                        }
-                        catch {
-                            console.log("Ignoring initial data due to local data mismatch.");
-                            console.log("Marking data as old.");
-                            o.old = true;
-                        }
-                        if (o.old == true || o == "error") {
-                            console.log("Data is either old or doesn't exist. Loading new data...");
-                            await runWeatherData("", true, async function (awd) {
-                                await placeData(awd);
-                                $(".lastUpdated").text("(Last updated: Just Now)");
-                                console.log("Done.")
-                            });
-                        }
-                        else {
-                            console.log("Checking the DB for last good data...");
-                            await checkLocalWeatherData("Current Location", async function (ooo) {
-                                console.log("Placing data...");
-                                await placeData(ooo.data);
-                                if (ooo.timeSince < 1) {
-                                    $(".lastUpdated").text("(Last updated: A few moments ago)");
-                                }
-                                else {
-                                    $(".lastUpdated").text("(Last updated: " + Math.round(o.timeSince) + " minutes ago)");
-                                }
-                                console.log("Done.")
-                            });
-                        }
-                    });
+            var settingsStore = localforage.createInstance({
+                name: "pwaWeather",
+                storeName: "settingsStore"
+            });
+
+            await checkDBVersion("0.2", settingsStore, async function (uptodateDB) {
+                if (uptodateDB) {
+                    updateLocationsList()
+                    await selectLocationData("Current Location", true)
                 }
             });
         });
