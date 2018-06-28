@@ -5,6 +5,10 @@ body {
     padding-right: env(safe-area-inset-right);
 }
 
+#navbarToggleExternalContent {
+    margin-top: 65px;
+}
+
 /* iPhone X */
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
@@ -13,6 +17,9 @@ body {
     }
     .devicespecific {
         padding-top: calc(env(safe-area-inset-top) + 5px);
+    }
+    #navbarToggleExternalContent {
+        margin-top: calc(env(safe-area-inset-top) + 90px);
     }
 }
 
@@ -25,6 +32,9 @@ body {
     .devicespecific {
         padding-top: 20px;
     }
+    #navbarToggleExternalContent {
+        margin-top: 75px;
+    }
 }
 
 /* iPhone 6+,7+,8+ */
@@ -35,6 +45,9 @@ body {
     }
     .devicespecific {
         padding-top: 20px;
+    }
+    #navbarToggleExternalContent {
+        margin-top: 75px;
     }
 }
 
@@ -47,6 +60,9 @@ body {
     .devicespecific {
         padding-top: 20px;
     }
+    #navbarToggleExternalContent {
+        margin-top: 75px;
+    }
 }
 
 /* iPad Pro 12.9" */
@@ -57,6 +73,9 @@ body {
     }
     .devicespecific {
         padding-top: 20px;
+    }
+    #navbarToggleExternalContent {
+        margin-top: 75px;
     }
 }
 
@@ -171,10 +190,6 @@ body {
 table {
     width: auto !important;
     table-layout: auto;
-}
-
-#navbarToggleExternalContent {
-    margin-top: 65px;
 }
 
 @keyframes spin {
