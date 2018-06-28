@@ -54,6 +54,8 @@ function setLocationName(s) {
     localforage.getItem("Location Search Results").then(function (dbData) {
         var askedName = prompt("Set friendly name:");
 
+        if(askedName)
+        {
         var finalData = {
             "location": dbData[s].location
         };
@@ -72,6 +74,10 @@ function setLocationName(s) {
                 });
             });
         });
+    }
+    else {
+        alert("Location name was blank. Please try again.");
+    }
 
     });
 }
