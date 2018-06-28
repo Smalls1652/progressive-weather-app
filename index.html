@@ -54,12 +54,12 @@
     <div class="collapse fixed-top devicespecific" id="navbarToggleExternalContent">
         <div class="bg-dark p-4">
             <div class="container-fluid pb-3">
-                <button class="btn btn-info" type="button" onclick="menuChange('locationsList');">Locations</button>
-                <button class="btn btn-info" type="button" onclick="menuChange('addLocation');">(+)</a>
+                <button class="btn btn-info" type="button" onclick="menuChange('addLocation');">Add a Location</a>
 
             </div>
             <div id="locationsList" class="collapse show">
                 <div class="container-fluid">
+                    <h4 class="text-white">Locations</h4>
                     <ul class="list-group">
                         <li class="list-group-item p-2" onclick="selectLocationData('Current Location', true);">Current Location</li>
                         <div id="userList"></div>
