@@ -65,6 +65,7 @@ function setLocationName(s) {
                 });
 
                 locationsStore.setItem(askedName, null).then(function () {
+                    updateLocationsList()
                     runWeatherData(askedName, false, function () {
                         menuChange("addLocation")
                     })
