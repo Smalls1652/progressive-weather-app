@@ -643,6 +643,9 @@ function shortForecastIcon(condition, daynight) {
     } else if (/(shra)/i.test(condition)) {
         //console.log("Rain");
         return "wi-showers";
+    } else if (/(rain)/i.test(condition)) {
+        //console.log("Rain");
+        return "wi-showers";
     } else if (/(rain_showers)/i.test(condition)) {
         //console.log("Rain");
         return "wi-showers";
