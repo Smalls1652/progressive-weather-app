@@ -535,6 +535,7 @@ async function checkLocalWeatherData(selectedLocation, callback) {
             } else {
                 callback({
                     "old": true,
+                    "timeSince": timeSince,
                     "data": keydata
                 });
             }
