@@ -519,7 +519,6 @@ async function checkLocalWeatherData(selectedLocation, callback) {
             callback("error");
         }
         else {
-            console.log(keydata);
 
             var compareTime = new Date().getTime() - keydata.updateTime;
 
@@ -561,8 +560,6 @@ async function addWeatherData(isCurrentLocation, weatherData, x) {
         "updateTime": new Date().getTime().toString(),
         "location": weatherData.location,
         "nwsdata": weatherData.nwsdata
-    }).then(function (value) {
-        console.log(value);
     }).catch(function (err) {
         console.log(err);
     });
@@ -653,6 +650,7 @@ function shortForecastIcon(condition, daynight) {
         //console.log("Rain");
         return "wi-hot";
     } else {
+	    console.log(condition);
         return "wi-na";
     }
 
