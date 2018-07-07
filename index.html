@@ -46,7 +46,7 @@
             </li>
         </ul>
         <form class="form-inline">
-            <a class="btn btn-info" href="#" role="button" onclick="runFreshUpdate();">
+            <a class="btn btn-info" href="#" id="refreshButton" role="button">
                 <i class="refreshIcon wi wi-refresh"></i>
             </a>
         </form>
@@ -54,7 +54,7 @@
     <div class="collapse fixed-top" id="navbarToggleExternalContent">
         <div class="bg-dark p-4">
             <div class="container-fluid pb-3">
-                <button class="btn btn-info" type="button" onclick="menuChange('addLocation');">Add a Location</a>
+                <button class="btn btn-info" type="button" href="#" id="addLocBtn">Add a Location</a>
 
             </div>
             <div id="locationsList" class="collapse show">
@@ -177,8 +177,12 @@
 
 
         $("#refreshButton").click(async function () {
-            await runFreshUpdate();
-        }, false);
+		    await runFreshUpdate(); 
+	    });
+        
+        $("#addLocBtn").click(function() {
+		    menuChange("addLocation");
+	    });
     </script>
 </body>
 
